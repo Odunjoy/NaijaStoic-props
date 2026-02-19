@@ -49,7 +49,9 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
     5. **SFX**: Include a relevant Sound Effect (SFX) for EVERY scene.
     6. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (4 locations) and a "Short Video" (3-5 scenes).
     7. **LANGUAGE - STRICT RULE**: ALL dialogue MUST be written STRICTLY in {lang_desc}. This is NON-NEGOTIABLE. Do NOT mix languages. Do NOT switch to Pidgin if English is selected.
-    8. **ZERO CHARACTER MOVEMENT**: Characters MUST stay completely stationary at all times. They MUST NOT walk, pace, run, or move between scenes. Location changes happen via SCENE CUTS only — the scene just starts in a new place. Actions are ONLY facial expressions and hand gestures while standing still.
+    8. **ZERO CHARACTER MOVEMENT + POSTURE AWARENESS**: Characters MUST stay completely stationary at all times. They MUST NOT walk, pace, run, or move between scenes. Location changes happen via SCENE CUTS only.
+       - If the location is a SEATED setting (auditorium, restaurant, cafe, car, classroom, office desk, boardroom, courtroom): Characters are SEATED. `action_description` MUST describe seated actions only — e.g. "leans forward in seat", "grips armrest", "turns in chair", NOT "walks" or "stands up".
+       - If the location is a STANDING setting (hallway, rooftop, market, street, living room): Characters STAND still. `action_description` describes standing posture only.
     
     OUTPUT FORMAT (JSON ONLY):
     {{
@@ -66,7 +68,7 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
               {{
                 "scene_id": 1,
                 "character": "name",
-                "action_description": "Specific action for motion prompt",
+                "action_description": "POSTURE-AWARE action: If location is a seated setting (auditorium, restaurant, car, etc.) → describe only seated actions (e.g. 'shifts in seat', 'leans toward other character'). If standing location → describe only standing gestures. NEVER include walking or movement between positions.",
                 "dialogue": "[Name] says: [Dialogue]",
                 "sfx": "Short SFX description (e.g., Dramatic boom, car door slam, marketplace noise)"
               }}
