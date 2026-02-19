@@ -1004,19 +1004,15 @@ def display_recreator_output(data: dict):
                 st.text_area(f"Setup Prompt {loc_idx + 1}", setup_prompt, height=150, key=f"re_loc_setup_{loc_idx}")
             
             for scene in loc.get("scenes", []):
-                # Generate prompts on the fly for Recreator mode
+                # Generate motion prompts on the fly for Recreator mode
                 scene["location_context"] = loc_desc
-                img_prompt = generate_image_prompt(scene, animation_style=st.session_state.get('animation_style', '3d_cgi'), visual_context=visual_ctx)
                 motion_prompt = generate_motion_prompt(scene, visual_context=st.session_state.get('style', 'default'), aesthetic_type=st.session_state.get('aesthetic_choice', '3D'))
                 
                 with st.expander(f"Scene {scene.get('scene_id')} - {scene.get('character')}"):
-                    st.markdown(f"**💬 Dialogue:** {scene.get('dialogue')}")
+                    st.markdown(f"**💬 Dialogue (under 6s):** {scene.get('dialogue')}")
+                    st.markdown(f"**🔊 SFX:** {scene.get('sfx', 'N/A')}")
                     
-                    c1, c2 = st.columns(2)
-                    with c1:
-                        st.text_area("Image Prompt", img_prompt, height=100, key=f"re_long_img_{global_scene_idx}")
-                    with c2:
-                        st.text_area("Motion Prompt", motion_prompt, height=100, key=f"re_long_mot_{global_scene_idx}")
+                    st.text_area("🎬 Motion Prompt (I2V)", motion_prompt, height=100, key=f"re_long_mot_{global_scene_idx}")
                 
                 global_scene_idx += 1
 
@@ -1036,18 +1032,14 @@ def display_recreator_output(data: dict):
         st.subheader("🎬 Shorts Scenes")
         
         for i, scene in enumerate(short_data.get("scenes", [])):
-            # Generate prompts on the fly
-            img_prompt = generate_image_prompt(scene, animation_style=st.session_state.get('animation_style', '3d_cgi'), visual_context=visual_ctx)
+            # Generate motion prompts on the fly
             motion_prompt = generate_motion_prompt(scene, visual_context=st.session_state.get('style', 'default'), aesthetic_type=st.session_state.get('aesthetic_choice', '3D'))
             
             with st.expander(f"Short Scene {scene.get('scene_id')}"):
-                st.markdown(f"**💬 Dialogue:** {scene.get('dialogue')}")
+                st.markdown(f"**💬 Dialogue (under 6s):** {scene.get('dialogue')}")
+                st.markdown(f"**🔊 SFX:** {scene.get('sfx', 'N/A')}")
                 
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.text_area("Image Prompt", img_prompt, height=100, key=f"re_short_img_{i}")
-                with c2:
-                    st.text_area("Motion Prompt", motion_prompt, height=100, key=f"re_short_mot_{i}")
+                st.text_area("🎬 Motion Prompt (I2V)", motion_prompt, height=100, key=f"re_short_mot_{i}")
 
 
 if __name__ == "__main__":

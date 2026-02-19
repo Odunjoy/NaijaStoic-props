@@ -40,45 +40,51 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
     
     MANDATORY REQUIREMENTS:
     1. **CHARACTER NAMES**: Change all names to common Nigerian names. 
-       - **RECURRING FAMILY**: If the story features a Father, Mother, or Triplets, use the names "Odogwu (Dad)", "Amaka (Mom)", and "Triplets (Ngozi, Chioma, Princess)". This ensures visual consistency.
-       - **OTHERS**: For any other roles (friends, teachers, coworkers, etc.), use unique, varied Nigerian names (e.g., Segun, Funke, Chinedu, Onyeka) to make every story feel like a new production.
-    2. **NIGERIANIZATION**: Set the story in Nigeria (Lagos, Abuja, Port Harcourt, etc.). Use local slang, culture, and context.
-    3. **STORY ENHANCEMENT**: Make the story more "dramatic" and "interesting" for a social media audience. Add Nigerian logic traps or "mic drop" moments.
-    4. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (for YouTube main) and a "Short Video" (for Shorts/TikTok).
-    5. **LANGUAGE**: Use {lang_desc}.
+       - **RECURRING FAMILY**: If the story features a Father, Mother, or Triplets, use the names "Odogwu (Dad)", "Amaka (Mom)", and "Triplets (Ngozi, Chioma, Princess)".
+       - **OTHERS**: For any other roles, use unique Nigerian names.
+    2. **ONE IMAGE PER LOCATION**: The story MUST be written so that every scene within a location can take place using the SAME background image (The Location Setup Image). Scenes should focus on dialogue and motion within that frame.
+    3. **DIALOGUE FORMAT**: Format all dialogue as: "[Character Name] says: [Dialogue]". 
+       - Dialogue MUST be short (max 12-15 words) to fit under 6 seconds per scene.
+    4. **NIGERIANIZATION**: Set in Nigeria with local slang and context. Improve drama for viral impact.
+    5. **SFX**: Include a relevant Sound Effect (SFX) for EVERY scene.
+    6. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (4 locations) and a "Short Video" (3-5 scenes).
+    7. **LANGUAGE**: Use {lang_desc}.
     
     OUTPUT FORMAT (JSON ONLY):
     {{
       "long_video": {{
-        "title": "Viral Clickbait Title for Long Video",
-        "description": "Engaging description with emojis",
-        "tags": ["tag1", "tag2", "tag3", "nigeria", "drama"],
-        "pov": "POV: You are watching a messy Lagos drama unfold. Edit with fast cuts and dramatic sound effects.",
+        "title": "Viral Clickbait Title",
+        "description": "Engaging description",
+        "tags": ["tag1", "tag2", "tag3"],
+        "pov": "POV instruction",
         "locations": [
           {{
             "location_id": 1,
-            "location_description": "Detailed setting description",
+            "location_description": "Detailed setting description (Used to generate the ONLY image for this location)",
             "scenes": [
               {{
                 "scene_id": 1,
                 "character": "name",
-                "action_description": "Specific action",
-                "dialogue": "Nigerianized dialogue (15 words max)"
+                "action_description": "Specific action for motion prompt",
+                "dialogue": "[Name] says: [Dialogue]",
+                "sfx": "Short SFX description (e.g., Dramatic boom, car door slam, marketplace noise)"
               }}
             ]
           }}
         ]
       }},
       "short_video": {{
-        "title": "Viral Title for Short",
-        "description": "Short description with hashtags",
-        "tags": ["shorts", "naija", "drama"],
-        "pov": "POV: The moment she realized... High energy edit.",
+        "title": "Short Title",
+        "description": "Short description",
+        "tags": ["shorts", "naija"],
+        "pov": "POV instruction",
         "scenes": [
           {{
             "scene_id": 1,
+            "character": "name",
             "action_description": "Quick action",
-            "dialogue": "Punchy line (10 words max)"
+            "dialogue": "[Name] says: [Dialogue]",
+            "sfx": "Relevant SFX"
           }}
         ]
       }}
