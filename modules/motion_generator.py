@@ -48,6 +48,8 @@ def generate_motion_prompt(scene: dict, visual_context: str = "", aesthetic_type
         # Fallback to legacy static dictionary
         char_motion = get_character_motion(scene_id, character)
     
+    extra_instruction = ""
+    
     # Location-aware background ambient motion
     location_ctx = scene.get("location_context", "").lower()
     if any(kw in location_ctx for kw in ["auditorium", "lecture", "classroom"]):
