@@ -176,13 +176,14 @@ def generate_character_style(character_target: str, outfit_override: str = None)
     makeup = random.choice(MAKEUP)
     acc = random.choice(ACCESSORIES)
     
-    # Logic: Force formal shoes for "suit" or "blazer" or "tuxedo"
+    # Shoe Selection Logic (Gender-aware)
     is_formal = any(keyword in outfit.lower() for keyword in ["suit", "blazer", "tuxedo", "dress shirt", "pencil", "formal"])
+    is_male = character_target in ["odogwu", "dad", "segun"]
     
-    if is_formal:
-        shoes = random.choice(["polished black loafers", "classic Oxford dress shoes", "elegant pointed-toe high heels"])
+    if is_male:
+        shoes = random.choice(["polished black loafers", "classic Oxford dress shoes", "sophisticated leather boots"]) if is_formal else random.choice(["clean designer sneakers", "polished black loafers"])
     else:
-        shoes = random.choice(SHOES)
+        shoes = random.choice(["elegant pointed-toe high heels", "polished black loafers"]) if is_formal else random.choice(["clean designer sneakers", "elegant high heels", "stylish flat shoes"])
     
     # Antagonist gets more makeup emphasis, Odogwu gets more hair/acc emphasis
     if character_target == "antagonist":
