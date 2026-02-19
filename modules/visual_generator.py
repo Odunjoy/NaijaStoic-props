@@ -57,30 +57,27 @@ CHARACTERS = {
     }
 }
 
-# OUTFIT POOLS (Diverse Nigerian Styles)
+# OUTFIT POOLS (Strict English/Western Styles)
 OUTFIT_POOLS = {
     "odogwu": [
-        "a sharp tailored grey blazer over a black turtleneck and slim-fit trousers",
-        "a fitted cream hoodie with dark cargo pants and clean streetwear sneakers",
-        "a crisp white linen button-down shirt with dark blue fitted denim jeans",
-        "a classic-fit denim jacket over a white t-shirt and charcoal chinos",
-        "a sleek navy blue bomber jacket with a plain t-shirt and dark jeans",
-        "a structured tan trench coat over a high-neck sweater and dress pants",
-        "a premium cotton polo shirt with well-fitted chinos",
-        "casual wear featuring a high-quality beautiful shirt and stylish trousers",
-        "a smart-casual look with a leather jacket over a simple tee and jeans"
+        "a sharp tailored charcoal 2-piece English suit with a crisp white shirt and silk necktie",
+        "a sophisticated navy blue 3-piece suit with a matching vest, white shirt, and tie",
+        "a premium black tuxedo with a crisp white formal shirt and black bow tie",
+        "a tailored grey blazer over a solid color button-down shirt and dress trousers",
+        "a slim-fit forest green suit with a black turtleneck (formal вечерний look)",
+        "a structured camel-colored overcoat over a professional suit and tie",
+        "a crisp white tailored dress shirt with black fitted formal trousers and a leather belt",
+        "a premium navy blazer with charcoal dress pants and a light blue shirt"
     ],
     "antagonist": [
-        "a sophisticated long floral maxi dress with a high neckline and elegant long sleeves",
-        "a modest knee-length floral midi dress with a high neckline and long sleeves",
-        "high-waisted long denim jeans with a crisp white tailored button-down shirt",
-        "a tailored beige blazer over a full-length maxi skirt and simple top",
-        "a tailored blazer over a professional knee-length pencil skirt and blouse",
-        "elegant wide-leg trousers with a fitted turtleneck sweater and gold jewelry",
-        "a sophisticated English-style wrap midi dress that hits just at the knee",
-        "a modest silk blouse with a high-neck and structured full-length trousers",
-        "a beautiful fitted shirt with a stylish knee-length skirt",
-        "premium casual wear with designer jeans and a chic top"
+        "a sophisticated professional black power suit with a tailored blazer and trousers",
+        "a premium navy blue pencil dress with a high neckline and elegant long sleeves",
+        "a tailored white blazer over a professional black midi dress",
+        "a sophisticated English-style wrap midi dress in a solid premium fabric",
+        "a professional grey skirt-suit with a tailored jacket and knee-length skirt",
+        "a crisp white tailored silk blouse with high-waisted professional black trousers",
+        "a luxury burgundy velvet evening dress with a modest high neckline",
+        "a tailored beige pantsuit with a silk camisole and professional jewelry"
     ]
 }
 
@@ -88,7 +85,7 @@ OUTFIT_POOLS = {
 HAIRSTYLES = ["a neatly faded haircut", "braided cornrows", "an elegant low bun", "a stylish afro", "short natural hair"]
 MAKEUP = ["clean skin and natural look", "bold red lipstick and perfect contour", "shimmery eyeshadow and glossy lips", "a fresh-faced glow"]
 ACCESSORIES = ["a luxury wristwatch", "stylish eyeglasses", "a delicate gold necklace"]
-SHOES = ["polished loafers", "clean designer sneakers", "elegant high heels", "stylish leather sandals", "classic dress shoes"]
+SHOES = ["polished black loafers", "clean designer sneakers", "elegant pointed-toe high heels", "classic Oxford dress shoes", "sophisticated leather boots"]
 
 # LOCATION POOL (Diverse fallback locations)
 LOCATION_POOL = [
@@ -175,16 +172,20 @@ def generate_character_style(character_target: str, outfit_override: str = None)
     import random
     
     outfit = outfit_override or random.choice(OUTFIT_POOLS.get(character_target, OUTFIT_POOLS["odogwu"]))
-    hair = random.choice(HAIRSTYLES)
-    makeup = random.choice(MAKEUP)
-    acc = random.choice(ACCESSORIES)
-    shoes = random.choice(SHOES)
+    
+    # Logic: Force formal shoes for "suit" or "blazer" or "tuxedo"
+    is_formal = any(keyword in outfit.lower() for keyword in ["suit", "blazer", "tuxedo", "dress shirt", "pencil", "formal"])
+    
+    if is_formal:
+        shoes = random.choice(["polished black loafers", "classic Oxford dress shoes", "elegant pointed-toe high heels"])
+    else:
+        shoes = random.choice(SHOES)
     
     # Antagonist gets more makeup emphasis, Odogwu gets more hair/acc emphasis
     if character_target == "antagonist":
-        return f"wearing {outfit}, with {hair}, {makeup}, accessorized with {acc}, and wearing {shoes}"
+        return f"wearing {outfit}, with {hair}, {makeup}, accessorized with {acc}, and wearing {shoes}. Clothes are perfectly fitted and tailored."
     else:
-        return f"wearing {outfit}, with {hair}, looking clean with {makeup}, accessorized with {acc}, and wearing {shoes}"
+        return f"wearing {outfit}, with {hair}, looking clean with {makeup}, accessorized with {acc}, and wearing {shoes}. The suit is well-tailored for his muscular build."
 
 
 def generate_base_character_prompt(character_type: str, animation_style: str = "3d_cgi", outfit_override: str = None) -> str:
