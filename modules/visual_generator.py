@@ -241,7 +241,8 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     if style_desc:
         style_instruction = f"Visual Style: {style_desc}. {style_instruction}"
     
-    return f"""Scene Setup - Wide shot: {dad_full} and {mom_full}. {posture_desc} in a {location_desc}. Both characters are clearly visible in the frame, maintaining their specific features (Dad's buzz cut/goatee and Mom's Afro/glasses) across all scenes. {context_element}The composition establishes the environment. {style_instruction}, {style['aspect_ratio']}."""
+    # Strictly enforce positioning and Western attire
+    return f"""Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with Odogwu standing on the left side and Amaka standing on the right side of the frame. STRICT MANDATE: Characters must wear ONLY English Western style clothing (suites, shirts, jeans) - NO traditional wear or kaftans. Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."""
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi") -> str:
