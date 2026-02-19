@@ -8,6 +8,8 @@ import json
 import os
 import glob
 import random
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 from dotenv import load_dotenv
 
 # Import our modules
