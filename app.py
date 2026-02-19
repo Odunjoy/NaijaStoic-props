@@ -987,7 +987,8 @@ def display_recreator_output(data: dict):
         st.markdown("---")
         st.subheader("🎬 Long Video Scenes")
         
-        visual_ctx = {"style": "Cinematic 3D CGI Animation", "location": "Nigeria"}
+        current_style_label = "2D Lofi Anime" if st.session_state.get('animation_style') == '2d_lofi' else "3D CGI Animation"
+        visual_ctx = {"style": current_style_label, "location": "Nigeria"}
         global_scene_idx = 0
         
         for loc_idx, loc in enumerate(long_data.get("locations", [])):
@@ -998,7 +999,7 @@ def display_recreator_output(data: dict):
             # Pass loc_desc into setup prompt generation
             setup_prompt = generate_scene_setup_prompt(
                 animation_style=st.session_state.get('animation_style', '3d_cgi'),
-                visual_context={"location": loc_desc, "style": "Cinematic 3D CGI Animation"}
+                visual_context={"location": loc_desc, "style": current_style_label}
             )
             with st.expander(f"🖼️ Location {loc_idx + 1} SETUP PROMPT (Copy this first)"):
                 st.text_area(f"Setup Prompt {loc_idx + 1}", setup_prompt, height=150, key=f"re_loc_setup_{loc_idx}")
