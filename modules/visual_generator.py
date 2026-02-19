@@ -30,29 +30,29 @@ DEFAULT_LOCATION = "high-end bedroom with a large wardrobe in the background, mo
 # BASE CHARACTER PROMPTS (Strict physical anchors for consistency)
 CHARACTERS = {
     "odogwu": {
-        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, wearing only English style clothing, short-cropped buzz cut hairstyle, sharp goatee, high cheekbones",
+        "base_desc": "Full image of a tall muscular Nigerian man, 30s, dark skin, wearing only English style clothing, short-cropped buzz cut hairstyle, sharp goatee, high cheekbones",
         "name": "Odogwu",
         "display_name": "Odogwu (Dad)"
     },
     "antagonist": {
-        "base_desc": "Full image of a tall curvy Nigerian woman, 30s, medium dark skin, wearing only English style clothing, large round afro hairstyle, wearing stylish black frame glasses, bold red lipstick",
+        "base_desc": "Full image of a very tall curvy Nigerian woman, 30s, medium dark skin, wearing only English style clothing, large round afro hairstyle, wearing stylish black frame glasses, bold red lipstick",
         "name": "Chioma",
         "display_name": "Mom/Chioma"
     },
     "dad": {
-        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, wearing only English style clothing, short-cropped buzz cut hairstyle, sharp goatee",
+        "base_desc": "Full image of a tall muscular Nigerian man, 30s, dark skin, wearing only English style clothing, short-cropped buzz cut hairstyle, sharp goatee",
         "name": "Odogwu"
     },
     "mom": {
-        "base_desc": "Full image of a curvy Nigerian woman, 30s, medium dark skin, wearing only English style clothing, large round afro hairstyle, wearing black glasses, bold red lipstick",
+        "base_desc": "Full image of a tall curvy Nigerian woman, 30s, medium dark skin, wearing only English style clothing, large round afro hairstyle, wearing black glasses, bold red lipstick",
         "name": "Amaka"
     },
     "triplet": {
-        "base_desc": "Full image of a pretty young Nigerian woman, 20s, dark skin, wearing only English style clothing, long braided cornrows hairstyle, expressive big eyes",
+        "base_desc": "Full image of a tall pretty young Nigerian woman, 20s, dark skin, wearing only English style clothing, long braided cornrows hairstyle, expressive big eyes",
         "name": "Ngozi"
     },
     "segun": {
-        "base_desc": "Full image of a handsome Nigerian man, 20s, medium skin, wearing only English style clothing, stylish low-fade haircut, clean shaven",
+        "base_desc": "Full image of a tall handsome Nigerian man, 20s, medium skin, wearing only English style clothing, stylish low-fade haircut, clean shaven",
         "name": "Segun"
     }
 }
