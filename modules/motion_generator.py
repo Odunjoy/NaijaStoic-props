@@ -25,7 +25,7 @@ def generate_motion_prompt(scene: dict, visual_context: str = "", aesthetic_type
     
     # Base motion requirements (dynamic based on aesthetic)
     aesthetic_note = "Maintain 2D aesthetic" if "2D" in aesthetic_type.upper() else "Maintain 3D aesthetic"
-    base_motion = f"Subtle movements only. {aesthetic_note}."
+    base_motion = f"Stay on one spot at all times. Subtle movements only. {aesthetic_note}."
     
     # Camera specific movement base
     camera_movement = "No camera movement."

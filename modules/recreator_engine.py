@@ -49,6 +49,7 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
     5. **SFX**: Include a relevant Sound Effect (SFX) for EVERY scene.
     6. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (4 locations) and a "Short Video" (3-5 scenes).
     7. **LANGUAGE**: Use {lang_desc}.
+    8. **MINIMAL MOVEMENT**: Characters MUST stay on one spot at all times while talking. Avoid "walking", "pacing", or "running" unless absolutely critical for the story. Focus only on facial expressions and hand gestures.
     
     OUTPUT FORMAT (JSON ONLY):
     {{
