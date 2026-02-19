@@ -39,7 +39,9 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
     {transcript}
     
     MANDATORY REQUIREMENTS:
-    1. **CHARACTER CHANGE**: You MUST change all character names to common Nigerian names (e.g., Chioma, Segun, Chinedu, Odogwu, Amaka).
+    1. **CHARACTER NAMES**: Change all names to common Nigerian names. 
+       - **RECURRING FAMILY**: If the story features a Father, Mother, or Triplets, use the names "Odogwu (Dad)", "Amaka (Mom)", and "Triplets (Ngozi, Chioma, Princess)". This ensures visual consistency.
+       - **OTHERS**: For any other roles (friends, teachers, coworkers, etc.), use unique, varied Nigerian names (e.g., Segun, Funke, Chinedu, Onyeka) to make every story feel like a new production.
     2. **NIGERIANIZATION**: Set the story in Nigeria (Lagos, Abuja, Port Harcourt, etc.). Use local slang, culture, and context.
     3. **STORY ENHANCEMENT**: Make the story more "dramatic" and "interesting" for a social media audience. Add Nigerian logic traps or "mic drop" moments.
     4. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (for YouTube main) and a "Short Video" (for Shorts/TikTok).

@@ -26,17 +26,34 @@ ANIMATION_STYLES = {
 # DEFAULT LOCATION (Fallback)
 DEFAULT_LOCATION = "high-end bedroom with a large wardrobe in the background, modern Nigerian interior design, softly lit, luxury Lekki home"
 
-# BASE CHARACTER PROMPTS (Generic base descriptions)
+# BASE CHARACTER PROMPTS (Strict physical anchors for consistency)
+# BASE CHARACTER PROMPTS (Strict physical anchors for consistency)
 CHARACTERS = {
     "odogwu": {
-        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, sharp goatee",
+        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, short-cropped buzz cut hairstyle, sharp goatee, high cheekbones",
         "name": "Odogwu",
-        "display_name": "Odogwu (Hero)"
+        "display_name": "Odogwu (Dad)"
     },
     "antagonist": {
-        "base_desc": "Full image of a tall, curvy Nigerian woman, 30s, medium dark skin, perfect contour and bold red lipstick",
+        "base_desc": "Full image of a tall curvy Nigerian woman, 30s, medium dark skin, large round afro hairstyle, wearing stylish black frame glasses, bold red lipstick",
         "name": "Chioma",
-        "display_name": "Chioma (Antagonist)"
+        "display_name": "Mom/Chioma"
+    },
+    "dad": {
+        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, short-cropped buzz cut hairstyle, sharp goatee",
+        "name": "Odogwu"
+    },
+    "mom": {
+        "base_desc": "Full image of a curvy Nigerian woman, 30s, medium dark skin, large round afro hairstyle, wearing black glasses, bold red lipstick",
+        "name": "Amaka"
+    },
+    "triplet": {
+        "base_desc": "Full image of a pretty young Nigerian woman, 20s, dark skin, long braided cornrows hairstyle, expressive big eyes",
+        "name": "Ngozi"
+    },
+    "segun": {
+        "base_desc": "Full image of a handsome Nigerian man, 20s, medium skin, stylish low-fade haircut, clean shaven",
+        "name": "Segun"
     }
 }
 
@@ -185,7 +202,7 @@ def generate_base_character_prompt(character_type: str, animation_style: str = "
 def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: dict = None, visual_context: dict = None) -> str:
     """
     Generate a comprehensive scene setup prompt that establishes the environment.
-    Uses extracted location and posture from visual_context if available.
+    Uses Character Anchors for Dad and Mom to ensure consistency.
     """
     import random
     style = ANIMATION_STYLES.get(animation_style, ANIMATION_STYLES["3d_cgi"])
@@ -197,20 +214,23 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     if isinstance(visual_context, dict):
         style_desc = visual_context.get("style", "")
         location_desc = visual_context.get("location") or random.choice(LOCATION_POOL)
-        posture_desc = visual_context.get("posture") or random.choice(POSTURE_POOL)
+        posture_desc = visual_context.get("posture") or "standing"
     else:
         style_desc = ""
         location_desc = random.choice(LOCATION_POOL)
-        posture_desc = random.choice(POSTURE_POOL)
+        posture_desc = "standing"
     
-    # Get character descriptions with dynamic styles
+    # 1. Physical Anchors
+    dad_base = CHARACTERS["dad"]["base_desc"]
+    mom_base = CHARACTERS["mom"]["base_desc"]
+    
+    # 2. Styles
     outfits = story_context.get("outfit_changes", {})
+    dad_style = generate_character_style("odogwu", outfits.get("odogwu"))
+    mom_style = generate_character_style("antagonist", outfits.get("antagonist"))
     
-    odogwu_style = generate_character_style("odogwu", outfits.get("odogwu"))
-    chioma_style = generate_character_style("antagonist", outfits.get("antagonist"))
-    
-    odogwu_desc = f"{CHARACTERS['odogwu']['base_desc']}, {odogwu_style}"
-    chioma_desc = f"{CHARACTERS['antagonist']['base_desc']}, {chioma_style}"
+    dad_full = f"Dad (Odogwu): {dad_base}, {dad_style}"
+    mom_full = f"Mom (Amaka): {mom_base}, {mom_style}"
     
     # Build context-specific scene elements
     prop_description = story_context.get("prop_description", "")
@@ -221,7 +241,7 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     if style_desc:
         style_instruction = f"Visual Style: {style_desc}. {style_instruction}"
     
-    return f"""Scene Setup - Wide shot: {odogwu_desc} and {chioma_desc}, {posture_desc} in a {location_desc}. Both characters are clearly visible in the frame, positioned naturally facing each other. {context_element}The composition shows the complete scene where Odogwu and Chioma's conversation will take place. {style_instruction}, {style['aspect_ratio']}."""
+    return f"""Scene Setup - Wide shot: {dad_full} and {mom_full}. {posture_desc} in a {location_desc}. Both characters are clearly visible in the frame, maintaining their specific features (Dad's buzz cut/goatee and Mom's Afro/glasses) across all scenes. {context_element}The composition establishes the environment. {style_instruction}, {style['aspect_ratio']}."""
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi") -> str:
@@ -235,17 +255,16 @@ def generate_establishing_shot(animation_style: str = "3d_cgi") -> str:
 def generate_image_prompt(scene: dict, variation: str = "default", animation_style: str = "3d_cgi", visual_context: dict = None, outfit_override: dict = None) -> str:
     """
     Generate a complete image prompt with character description.
-    Uses extracted location, style, and posture from visual_context.
+    Supports fixed anchors for Dad/Mom/Triplets AND dynamic looks for others.
     """
     import random
     scene_id = scene.get("scene_id", 1)
     camera_angle = scene.get("camera_angle", "Close-up")
-    character = scene.get("character", "protagonist")
+    character_name = scene.get("character", "protagonist").lower()
     phase = scene.get("phase", "Hook")
     
     # Handle visual context and location overriding
     scene_location = scene.get("location_context")
-    
     if isinstance(visual_context, dict):
         style_desc = visual_context.get("style", "")
         location_desc = scene_location or visual_context.get("location") or random.choice(LOCATION_POOL)
@@ -258,51 +277,61 @@ def generate_image_prompt(scene: dict, variation: str = "default", animation_sty
     # Get style preset
     style = ANIMATION_STYLES.get(animation_style, ANIMATION_STYLES["3d_cgi"])
     
-    # Get character styling
-    outfits = outfit_override or {}
-    odogwu_style = generate_character_style("odogwu", outfits.get("odogwu"))
-    chioma_style = generate_character_style("antagonist", outfits.get("antagonist"))
-    
-    odogwu_full = f"{CHARACTERS['odogwu']['base_desc']}, {odogwu_style}"
-    chioma_full = f"{CHARACTERS['antagonist']['base_desc']}, {chioma_style}"
+    # 1. Resolve Character Roles and Physical Anchors
+    dad_full = f"Dad (Odogwu): {CHARACTERS['dad']['base_desc']}"
+    mom_full = f"Mom (Amaka): {CHARACTERS['mom']['base_desc']}"
+    triplet_full = f"Triplet: {CHARACTERS['triplet']['base_desc']}"
 
-    # Get character action
-    action = scene.get("action_description")
-    if not action:
-        action = get_scene_action_detailed(phase, character, scene_id)
+    # Detect character type and physical anchor
+    focus_char_desc = ""
+    display_name = scene.get("character", "Character")
+    is_female = False
     
-    # Integrate posture into action if it's a wide shot
-    if "Wide" in camera_angle:
-        action = f"{action}, while {posture_desc}"
-    
-    # Determine who is talking to whom
-    if character == "protagonist":
-        talking_context = f"{CHARACTERS['odogwu']['name']} talking to {CHARACTERS['antagonist']['name']}"
-    elif character == "antagonist":
-        talking_context = f"{CHARACTERS['antagonist']['name']} talking to {CHARACTERS['odogwu']['name']}"
+    if "dad" in character_name or "odogwu" in character_name:
+        focus_char_desc = dad_full
+    elif "mom" in character_name or "amaka" in character_name:
+        focus_char_desc = mom_full
+        is_female = True
+    elif "triplet" in character_name or "ngozi" in character_name or "chioma" in character_name or "princess" in character_name:
+        focus_char_desc = triplet_full
+        is_female = True
+    elif "segun" in character_name:
+        focus_char_desc = f"{display_name}: {CHARACTERS['segun']['base_desc']}"
     else:
-        talking_context = f"{CHARACTERS['odogwu']['name']} and {CHARACTERS['antagonist']['name']} in conversation"
+        # DYNAMIC LOOK for unique story characters
+        # We vary skin tone, hair, and simple traits to avoid repetition
+        skin = random.choice(["dark", "medium-dark", "rich ebony"])
+        hair = random.choice(["short hair", "braided hair", "neat fade", "locs"])
+        gender_clue = "woman" if any(x in character_name for x in ["she", "her", "lady", "girl", "auntie", "sister"]) else "man"
+        if gender_clue == "woman": is_female = True
+        focus_char_desc = f"{display_name}: full image of a Nigerian {gender_clue}, {skin} skin, {hair}"
+
+    # 2. Get Outfit
+    outfits = outfit_override or {}
+    outfit_key = "antagonist" if is_female else "odogwu"
+    char_styling = generate_character_style(outfit_key, outfits.get(outfit_key))
     
-    # Style instruction with visual context
+    focus_desc_with_outfit = f"{focus_char_desc}, {char_styling}"
+
+    # 3. Get Character Action
+    action = scene.get("action_description") or get_scene_action_detailed(phase, "protagonist" if not is_female else "antagonist", scene_id)
+    
+    # 4. Handle Shot Type
+    if "Wide" in camera_angle:
+        context = f"wide shot focusing on {focus_desc_with_outfit}."
+        action = f"{action}, while {posture_desc}"
+    else:
+        context = f"close-up shot of {focus_desc_with_outfit}."
+
+    # 5. Style instruction
     style_instruction = f"{style['base_style']}"
-    
     variations = get_style_variations()
     grading = variations.get(variation, "")
-    if grading:
-        style_instruction += f", {grading}"
-        
-    if style_desc:
-        style_instruction = f"Visual Style: {style_desc}. {style_instruction}"
+    if grading: style_instruction += f", {grading}"
+    if style_desc: style_instruction = f"Visual Style: {style_desc}. {style_instruction}"
 
-    # Construct FULL detailed prompt
-    if character == "protagonist":
-        prompt = f"{talking_context}. {odogwu_full}, {action}. Background is a {location_desc}. {style_instruction}, {style['aspect_ratio']}."
-    
-    elif character == "antagonist":
-        prompt = f"{talking_context}. {chioma_full}, {action}. Background is a {location_desc}. {style_instruction}, {style['aspect_ratio']}."
-    
-    else:  # both characters
-        prompt = f"{talking_context}. {odogwu_full} and {chioma_full}, {action}. Background is a {location_desc}. {style_instruction}, {style['aspect_ratio']}."
+    # 6. Construct FINAL prompt
+    prompt = f"{context} {action}. Background is a {location_desc}. {style_instruction}, {style['aspect_ratio']}."
     
     return prompt
 
