@@ -1,46 +1,23 @@
 import os
-import cv2
 import yt_dlp
+import requests
 import glob
 
 def download_video(url, output_path="downloads"):
     """
-    Download a YouTube video using yt-dlp.
+    Kept for compatibility. On Streamlit Cloud, actual video download
+    is not possible without ffmpeg. Use extract_frames_from_url instead.
+    Returns None gracefully so the UI can fall back.
+    """
+    return None
+
+def extract_frames_from_url(url, output_path="frames", num_frames=6):
+    """
+    Cloud-safe frame extraction: uses yt-dlp to get thumbnail/storyboard URLs
+    and downloads them as image frames — no ffmpeg or video download needed.
     
     Args:
         url (str): YouTube video URL
-        output_path (str): Directory to save the video
-        
-    Returns:
-        str: Path to the downloaded video file, or None if failed
-    """
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    
-    # Configure yt-dlp to download best quality mp4 that doesn't require ffmpeg merging
-    ydl_opts = {
-        'format': 'best[ext=mp4]/best',  # Prefer mp4, fallback to best
-        'outtmpl': os.path.join(output_path, '%(id)s.%(ext)s'),
-        'quiet': True,
-        'no_warnings': True,
-    }
-    
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            video_id = info['id']
-            ext = info['ext']
-            return os.path.join(output_path, f"{video_id}.{ext}")
-    except Exception as e:
-        print(f"Error downloading video: {e}")
-        return None
-
-def extract_frames(video_path, output_path="frames", num_frames=6):
-    """
-    Extract frames from a video file at regular intervals.
-    
-    Args:
-        video_path (str): Path to the video file
         output_path (str): Directory to save frames
         num_frames (int): Number of frames to extract
         
@@ -49,41 +26,91 @@ def extract_frames(video_path, output_path="frames", num_frames=6):
     """
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-        
+    
     # Clear existing frames
-    files = glob.glob(os.path.join(output_path, "*"))
-    for f in files:
+    for f in glob.glob(os.path.join(output_path, "*")):
         try:
             os.remove(f)
         except:
             pass
-            
-    cap = cv2.VideoCapture(video_path)
-    
-    if not cap.isOpened():
-        return []
-        
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    duration = total_frames / fps if fps > 0 else 0
     
     extracted_paths = []
     
-    if total_frames > 0:
-        interval = total_frames // (num_frames + 1)
+    try:
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'skip_download': True,
+            'write_thumbnail': False,
+        }
         
-        for i in range(num_frames):
-            frame_id = interval * (i + 1)
-            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
-            ret, frame = cap.read()
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+        
+        # Strategy 1: Use storyboard/heatmap thumbnails if available
+        thumbnails = info.get('thumbnails', [])
+        
+        # Filter to images only (not storyboards which are webp sequences)
+        image_thumbs = [
+            t for t in thumbnails
+            if t.get('url') and
+            not any(x in t.get('url','') for x in ['storyboard', 'sb=', 'M'])
+        ]
+        
+        # Sort by resolution descending and pick most distinct ones
+        image_thumbs.sort(key=lambda t: (t.get('width', 0) * t.get('height', 0)), reverse=True)
+        
+        # Pick evenly spaced thumbnails to simulate scene extraction
+        if image_thumbs:
+            # Deduplicate by URL
+            seen_urls = set()
+            unique_thumbs = []
+            for t in image_thumbs:
+                if t['url'] not in seen_urls:
+                    seen_urls.add(t['url'])
+                    unique_thumbs.append(t)
             
-            if ret:
-                frame_path = os.path.join(output_path, f"frame_{i+1}.jpg")
-                cv2.imwrite(frame_path, frame)
-                extracted_paths.append(frame_path)
-                
-    cap.release()
+            # Select num_frames evenly spaced
+            step = max(1, len(unique_thumbs) // num_frames)
+            selected = unique_thumbs[::step][:num_frames]
+            
+            # If we have fewer than requested, pad with the main thumbnail
+            if not selected:
+                thumb_url = info.get('thumbnail')
+                if thumb_url:
+                    selected = [{'url': thumb_url}] * min(num_frames, 3)
+        else:
+            # Fallback: just use the main thumbnail duplicated
+            thumb_url = info.get('thumbnail')
+            selected = [{'url': thumb_url}] * min(num_frames, 1) if thumb_url else []
+        
+        # Download the selected thumbnail images
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        for i, thumb in enumerate(selected):
+            try:
+                resp = requests.get(thumb['url'], headers=headers, timeout=10)
+                if resp.status_code == 200:
+                    frame_path = os.path.join(output_path, f"frame_{i+1}.jpg")
+                    with open(frame_path, 'wb') as f:
+                        f.write(resp.content)
+                    extracted_paths.append(frame_path)
+            except Exception as e:
+                print(f"Frame {i+1} download error: {e}")
+        
+    except Exception as e:
+        print(f"Error extracting frames: {e}")
+    
     return extracted_paths
+
+
+def extract_frames(video_path, output_path="frames", num_frames=6):
+    """
+    Legacy function kept for compatibility.
+    On Streamlit Cloud, video download is unavailable.
+    Returns empty list — caller should use extract_frames_from_url instead.
+    """
+    return []
+
 
 def get_video_info(url):
     """

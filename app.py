@@ -19,7 +19,7 @@ from modules.visual_generator import generate_image_prompt, get_style_variations
 from modules.motion_generator import generate_motion_prompt
 from modules.sfx_generator import suggest_sfx, generate_sfx_manifest
 from modules.seo_mapper import load_seo_database, match_content, get_seo_by_id, list_all_titles
-from modules.youtube_utils import download_video, extract_frames, get_video_info, get_transcript
+from modules.youtube_utils import download_video, extract_frames, extract_frames_from_url, get_video_info, get_transcript
 from modules.recreator_engine import recreate_story
 from modules.metadata_manager import generate_scene_metadata, generate_video_metadata, add_pov_context_to_seo
 from constants import FEMALE_VOICE_SPEC, MALE_VOICE_SPEC # Import voice specs from constants
@@ -97,65 +97,119 @@ def main():
 
 
 def render_youtube_extractor():
-    """Render the YouTube Scene Extractor UI — Transcript-First approach for Streamlit Cloud."""
+    """Render the YouTube Scene Extractor UI."""
     st.header("📺 YouTube Scene Extractor")
-    st.info("Paste a YouTube URL to extract its transcript and send it straight to the Script Transformer.")
-
+    st.info("Extract major scene screenshots from YouTube videos to help visualize and recreate context.")
+    
+    # URL Input - keep key stable to persist input
     url = st.text_input("YouTube Video URL", placeholder="https://www.youtube.com/watch?v=...", key="yt_url_input")
-
+    
     if url:
-        # Only fetch when URL changes
-        if st.session_state.get('last_yt_url') != url:
-            st.session_state.pop('yt_video_info', None)
-            st.session_state.pop('yt_transcript', None)
-            st.session_state['last_yt_url'] = url
-
-        # --- Video Info ---
-        if 'yt_video_info' not in st.session_state:
-            with st.spinner("🔍 Fetching video info..."):
+        # Get video info first (only if new URL or not implicitly stored? Streamlit handles caching if just re-running)
+        # Using session state to avoid re-fetching on every run if URL hasn't changed
+        if 'last_url' not in st.session_state or st.session_state['last_url'] != url:
+            with st.spinner("Fetching video info..."):
                 info = get_video_info(url)
                 if info:
-                    st.session_state['yt_video_info'] = info
+                    st.session_state['video_info'] = info
+                    st.session_state['last_url'] = url
                 else:
-                    st.error("❌ Could not reach this video. Please check the URL.")
-
-        if 'yt_video_info' in st.session_state:
-            info = st.session_state['yt_video_info']
-            col1, col2 = st.columns([1, 2])
+                    st.error("Could not fetch video info. Please check the URL.")
+                    
+        # Display Info if available
+        if 'video_info' in st.session_state:
+            info = st.session_state['video_info']
+            st.success(f"Found: **{info['title']}** ({info['duration']}s)")
+            if info['thumbnail']:
+                st.image(info['thumbnail'], width=320)
+                
+            # Settings
+            col1, col2 = st.columns(2)
             with col1:
-                if info.get('thumbnail'):
-                    st.image(info['thumbnail'], width=240)
-            with col2:
-                duration_min = info.get('duration', 0) // 60
-                duration_sec = info.get('duration', 0) % 60
-                st.markdown(f"### 🎬 {info.get('title', 'Unknown Title')}")
-                st.caption(f"⏱️ Duration: {duration_min}m {duration_sec}s")
+                num_frames = st.slider("Number of screenshots to extract", 3, 12, 6)
+            
+            # Process button
+            if st.button("📸 Extract Scenes", type="primary"):
+                process_youtube_video(url, num_frames)
+                st.rerun() # Rerun to update the view immediately with new frames
 
-            st.markdown("---")
-
-            # --- Transcript Extraction ---
-            if st.button("📜 Extract Transcript", type="primary"):
-                with st.spinner("Extracting transcript..."):
-                    transcript = get_transcript(url)
-                    if transcript:
-                        st.session_state['yt_transcript'] = transcript
-                        st.success("✅ Transcript extracted!")
-                    else:
-                        st.error("❌ No transcript available for this video. It may be auto-caption disabled or region-locked.")
-
-    # --- Display Transcript ---
-    if 'yt_transcript' in st.session_state:
-        transcript = st.session_state['yt_transcript']
-        st.markdown("### 📄 Extracted Transcript")
-        st.text_area("Transcript (editable)", transcript, height=300, key="yt_transcript_display")
-
+    # PERSISTENT DISPLAY - Check session state for frames regardless of button press
+    if 'extracted_frames' in st.session_state and st.session_state['extracted_frames']:
+        frames = st.session_state['extracted_frames']
         st.markdown("---")
-        st.markdown("### 🚀 Send to Script Transformer")
-        st.caption("This will copy the transcript into the Script Transformer input so you can Nigerianize it.")
+        st.subheader(f"📸 Extracted Scenes ({len(frames)})")
+        
+        # Display in grid
+        cols = st.columns(3)
+        for i, frame_path in enumerate(frames):
+            with cols[i % 3]:
+                st.image(frame_path, caption=f"Scene {i+1}", use_column_width=True)
 
-        if st.button("➡️ Use This Transcript in Script Transformer", type="primary"):
-            st.session_state['manual_transcript'] = st.session_state.get('yt_transcript_display', st.session_state.get('yt_transcript', ''))
-            st.success("✅ Transcript loaded! Switch to 'Script Transformer' in the sidebar and scroll to 'Video Story Recreator'.")
+        # Video Context Analysis Section (Persistent)
+        st.markdown("---")
+        st.subheader("🎨 Visual Style Analysis")
+        
+        # Check if we already have analysis results
+        if 'visual_context' in st.session_state and st.session_state['visual_context']:
+            analysis_result = st.session_state['visual_context']
+            st.success("✅ Style Analyzed! Switch to 'Script Transformer' to use it.")
+            
+            if isinstance(analysis_result, dict):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.info(f"**Detected Style:** {analysis_result.get('style')}")
+                with col2:
+                    st.success(f"**Detected Location:** {analysis_result.get('location')}")
+            else:
+                st.info(f"**Detected Style:** {analysis_result}")
+            
+            if st.button("🔄 Re-Analyze Visual Style"):
+                # Clear and re-run analysis logic
+                perform_visual_analysis()
+        else:
+            if st.button("✨ Analyze Visual Style for Script Transformer"):
+                perform_visual_analysis()
+
+
+def perform_visual_analysis():
+    """Helper to run the analysis logic."""
+    if 'extracted_frames' not in st.session_state:
+        return
+
+    api_key = os.getenv("GOOGLE_API_KEY") or st.text_input("Enter Google API Key for Analysis", type="password")
+    if api_key:
+        with st.spinner("Analyzing visual style of extracted frames..."):
+            analysis_result = analyze_visual_style(st.session_state['extracted_frames'], api_key)
+        
+        if analysis_result:
+            st.session_state['visual_context'] = analysis_result
+            st.rerun() # Refresh to show results
+        else:
+            st.error("Could not analyze images. Check API key and quotas.")
+    else:
+        st.warning("API Key needed for analysis.")
+
+
+def process_youtube_video(url, num_frames):
+    """Handle the download and extraction process using Cloud-safe thumbnail method."""
+    status_text = st.empty()
+    progress_bar = st.progress(0)
+    
+    status_text.text("🔍 Fetching video thumbnails... (no download needed)")
+    progress_bar.progress(20)
+    
+    frames = extract_frames_from_url(url, "temp_frames", num_frames)
+    
+    progress_bar.progress(90)
+    
+    if frames:
+        st.session_state['extracted_frames'] = frames
+        status_text.text(f"✅ Extracted {len(frames)} scene thumbnails!")
+    else:
+        status_text.text("❌ Could not extract thumbnails.")
+        st.error("⚠️ Failed to extract shots. This may be due to a private video, age-restricted content, or a URL issue. Please try a different video.")
+    
+    progress_bar.progress(100)
 
 
 def render_script_transformer():
