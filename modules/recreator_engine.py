@@ -45,10 +45,10 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
     2. **ONE IMAGE PER LOCATION**: The story MUST be written so that every scene within a location can take place using the SAME background image (The Location Setup Image). Scenes should focus on dialogue and motion within that frame.
     3. **DIALOGUE FORMAT**: Format all dialogue as: "[Character Name] says: [Dialogue]". 
        - Dialogue MUST be short (max 12-15 words) to fit under 6 seconds per scene.
-    4. **NIGERIANIZATION**: Set in Nigeria with local slang and context. Improve drama for viral impact.
+    4. **NIGERIANIZATION**: Set in Nigeria with authentic Nigerian context and drama. Improve drama for viral impact.
     5. **SFX**: Include a relevant Sound Effect (SFX) for EVERY scene.
     6. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (4 locations) and a "Short Video" (3-5 scenes).
-    7. **LANGUAGE**: Use {lang_desc}.
+    7. **LANGUAGE - STRICT RULE**: ALL dialogue MUST be written STRICTLY in {lang_desc}. This is NON-NEGOTIABLE. Do NOT mix languages. Do NOT switch to Pidgin if English is selected.
     8. **MINIMAL MOVEMENT**: Characters MUST stay on one spot at all times while talking. Avoid "walking", "pacing", or "running" unless absolutely critical for the story. Focus only on facial expressions and hand gestures.
     
     OUTPUT FORMAT (JSON ONLY):
