@@ -57,27 +57,27 @@ CHARACTERS = {
     }
 }
 
-# OUTFIT POOLS (Strict English/Western Styles)
+# OUTFIT POOLS (Gen Z English Styles)
 OUTFIT_POOLS = {
     "odogwu": [
-        "a sharp tailored charcoal 2-piece English suit with a crisp white shirt and silk necktie",
-        "a sophisticated navy blue 3-piece suit with a matching vest, white shirt, and tie",
-        "a premium black tuxedo with a crisp white formal shirt and black bow tie",
-        "a tailored grey blazer over a solid color button-down shirt and dress trousers",
-        "a slim-fit forest green suit with a black turtleneck (formal вечерний look)",
-        "a structured camel-colored overcoat over a professional suit and tie",
-        "a crisp white tailored dress shirt with black fitted formal trousers and a leather belt",
-        "a premium navy blazer with charcoal dress pants and a light blue shirt"
+        "a fitted polo shirt in navy blue with dark slim-fit chinos and clean sneakers",
+        "a crisp white polo shirt with well-fitted khaki chinos and leather loafers",
+        "a premium oversized graphic tee with dark fitted joggers and designer sneakers",
+        "a classic button-down flannel shirt layered over a plain white tee with slim jeans",
+        "a fitted crew-neck sweater with smart dark trousers and clean white sneakers",
+        "a stylish quarter-zip pullover in charcoal grey with slim-fit chinos",
+        "a casual bomber jacket over a plain fitted t-shirt with dark slim jeans",
+        "a premium polo shirt in forest green with beige chinos and loafers"
     ],
     "antagonist": [
-        "a sophisticated professional black power suit with a tailored blazer and trousers",
-        "a premium navy blue pencil dress with a high neckline and elegant long sleeves",
-        "a tailored white blazer over a professional black midi dress",
-        "a sophisticated English-style wrap midi dress in a solid premium fabric",
-        "a professional grey skirt-suit with a tailored jacket and knee-length skirt",
-        "a crisp white tailored silk blouse with high-waisted professional black trousers",
-        "a luxury burgundy velvet evening dress with a modest high neckline",
-        "a tailored beige pantsuit with a silk camisole and professional jewelry"
+        "a chic knee-length A-line skirt dress in a solid pastel color with short sleeves",
+        "a stylish knee-length wrap dress with a floral print and elegant long sleeves",
+        "a fitted knee-length pencil skirt with a tucked-in ribbed crop top and belt",
+        "a trendy co-ord set with a cropped blazer and matching knee-length skirt",
+        "a casual-chic midi skirt with a fitted turtleneck top in complementary colors",
+        "a smart knee-length shirt dress with a button-front and cinched waist belt",
+        "a premium knit top with a pleated knee-length skirt and simple flat shoes",
+        "a fitted bodycon midi dress in a bold solid color with a modest neckline"
     ]
 }
 
