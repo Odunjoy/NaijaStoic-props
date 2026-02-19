@@ -1003,6 +1003,21 @@ def display_recreator_output(data: dict):
             with st.expander(f"🖼️ Location {loc_idx + 1} SETUP PROMPT (Copy this first)"):
                 st.text_area(f"Setup Prompt {loc_idx + 1}", setup_prompt, height=150, key=f"re_loc_setup_{loc_idx}")
             
+            # --- Bulk Copy All Scenes for Location ---
+            all_scenes_text = []
+            for s_idx, scene in enumerate(loc.get("scenes", [])):
+                scene["location_context"] = loc_desc
+                m_prompt = generate_motion_prompt(scene, visual_context=st.session_state.get('style', 'default'), aesthetic_type=st.session_state.get('aesthetic_choice', '3D'))
+                
+                scene_block = f"Scene {s_idx + 1}. Motion: {m_prompt} Dialogue: {scene.get('dialogue')} SFX: {scene.get('sfx', 'N/A')}"
+                all_scenes_text.append(scene_block)
+            
+            combined_location_text = " ".join(all_scenes_text)
+            
+            with st.expander(f"📋 Copy ALL {len(loc.get('scenes', []))} Scenes for this Location (Paragraph Format)"):
+                st.text_area(f"Bulk Copy Loc {loc_idx + 1}", combined_location_text, height=250, key=f"re_loc_bulk_{loc_idx}")
+            
+            st.markdown("---")
             for scene in loc.get("scenes", []):
                 # Generate motion prompts on the fly for Recreator mode
                 scene["location_context"] = loc_desc
