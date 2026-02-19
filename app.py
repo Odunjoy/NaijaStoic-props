@@ -1013,11 +1013,11 @@ def display_recreator_output(data: dict):
                 scene_block = f"Scene {s_idx + 1}. Motion: {m_prompt} Dialogue: {scene.get('dialogue')} SFX: {scene.get('sfx', 'N/A')}"
                 all_scenes_text.append(scene_block)
             
-            # Use double space between scenes for better copy-paste separation in a single paragraph
-            combined_location_text = "  ".join(all_scenes_text)
+            # Use double newline between scenes for clear blocks as requested
+            combined_location_text = "\n\n".join(all_scenes_text)
             
-            with st.expander(f"📋 Copy ALL {len(loc.get('scenes', []))} Scenes for this Location (Paragraph Format)"):
-                st.text_area(f"Bulk Copy Loc {loc_idx + 1}", combined_location_text, height=250, key=f"re_loc_bulk_{loc_idx}")
+            with st.expander(f"📋 Copy ALL {len(loc.get('scenes', []))} Scenes for this Location (Combined)"):
+                st.text_area(f"Bulk Copy Loc {loc_idx + 1}", combined_location_text, height=300, key=f"re_loc_bulk_{loc_idx}")
             
             st.markdown("---")
             for scene in loc.get("scenes", []):
