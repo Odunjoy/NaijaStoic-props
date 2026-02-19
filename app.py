@@ -1009,10 +1009,13 @@ def display_recreator_output(data: dict):
                 motion_prompt = generate_motion_prompt(scene, visual_context=st.session_state.get('style', 'default'), aesthetic_type=st.session_state.get('aesthetic_choice', '3D'))
                 
                 with st.expander(f"Scene {scene.get('scene_id')} - {scene.get('character')}"):
+                    # Combined copy block
+                    copy_all = f"Motion: {motion_prompt}\n\n💬 Dialogue: {scene.get('dialogue')}\n\n🔊 SFX: {scene.get('sfx', 'N/A')}"
+                    st.text_area("📋 Copy All (Motion + Dialogue + SFX)", copy_all, height=200, key=f"re_long_all_{global_scene_idx}")
+                    
+                    st.markdown("---")
                     st.markdown(f"**💬 Dialogue (under 6s):** {scene.get('dialogue')}")
                     st.markdown(f"**🔊 SFX:** {scene.get('sfx', 'N/A')}")
-                    
-                    st.text_area("🎬 Motion Prompt (I2V)", motion_prompt, height=100, key=f"re_long_mot_{global_scene_idx}")
                 
                 global_scene_idx += 1
 
@@ -1036,10 +1039,13 @@ def display_recreator_output(data: dict):
             motion_prompt = generate_motion_prompt(scene, visual_context=st.session_state.get('style', 'default'), aesthetic_type=st.session_state.get('aesthetic_choice', '3D'))
             
             with st.expander(f"Short Scene {scene.get('scene_id')}"):
+                # Combined copy block
+                copy_all_short = f"Motion: {motion_prompt}\n\n💬 Dialogue: {scene.get('dialogue')}\n\n🔊 SFX: {scene.get('sfx', 'N/A')}"
+                st.text_area("📋 Copy All (Motion + Dialogue + SFX)", copy_all_short, height=200, key=f"re_short_all_{i}")
+                
+                st.markdown("---")
                 st.markdown(f"**💬 Dialogue (under 6s):** {scene.get('dialogue')}")
                 st.markdown(f"**🔊 SFX:** {scene.get('sfx', 'N/A')}")
-                
-                st.text_area("🎬 Motion Prompt (I2V)", motion_prompt, height=100, key=f"re_short_mot_{i}")
 
 
 if __name__ == "__main__":
