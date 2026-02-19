@@ -30,29 +30,29 @@ DEFAULT_LOCATION = "high-end bedroom with a large wardrobe in the background, mo
 # BASE CHARACTER PROMPTS (Strict physical anchors for consistency)
 CHARACTERS = {
     "odogwu": {
-        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, short-cropped buzz cut hairstyle, sharp goatee, high cheekbones",
+        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, wearing only English style clothing, short-cropped buzz cut hairstyle, sharp goatee, high cheekbones",
         "name": "Odogwu",
         "display_name": "Odogwu (Dad)"
     },
     "antagonist": {
-        "base_desc": "Full image of a tall curvy Nigerian woman, 30s, medium dark skin, large round afro hairstyle, wearing stylish black frame glasses, bold red lipstick",
+        "base_desc": "Full image of a tall curvy Nigerian woman, 30s, medium dark skin, wearing only English style clothing, large round afro hairstyle, wearing stylish black frame glasses, bold red lipstick",
         "name": "Chioma",
         "display_name": "Mom/Chioma"
     },
     "dad": {
-        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, short-cropped buzz cut hairstyle, sharp goatee",
+        "base_desc": "Full image of a muscular Nigerian man, 30s, dark skin, wearing only English style clothing, short-cropped buzz cut hairstyle, sharp goatee",
         "name": "Odogwu"
     },
     "mom": {
-        "base_desc": "Full image of a curvy Nigerian woman, 30s, medium dark skin, large round afro hairstyle, wearing black glasses, bold red lipstick",
+        "base_desc": "Full image of a curvy Nigerian woman, 30s, medium dark skin, wearing only English style clothing, large round afro hairstyle, wearing black glasses, bold red lipstick",
         "name": "Amaka"
     },
     "triplet": {
-        "base_desc": "Full image of a pretty young Nigerian woman, 20s, dark skin, long braided cornrows hairstyle, expressive big eyes",
+        "base_desc": "Full image of a pretty young Nigerian woman, 20s, dark skin, wearing only English style clothing, long braided cornrows hairstyle, expressive big eyes",
         "name": "Ngozi"
     },
     "segun": {
-        "base_desc": "Full image of a handsome Nigerian man, 20s, medium skin, stylish low-fade haircut, clean shaven",
+        "base_desc": "Full image of a handsome Nigerian man, 20s, medium skin, wearing only English style clothing, stylish low-fade haircut, clean shaven",
         "name": "Segun"
     }
 }
@@ -94,7 +94,7 @@ SHOES = ["polished loafers", "clean designer sneakers", "elegant high heels", "s
 LOCATION_POOL = [
     "high-end bedroom with a large wardrobe in the background, modern Nigerian interior design",
     "luxury Lagos penthouse living room with floor-to-ceiling windows showing city lights",
-    "contemporary home office with mahogany furniture and African art",
+    "contemporary home office with mahogany furniture and modern minimalist art",
     "exclusive rooftop lounge in Victoria Island with a view of the Atlantic",
     "modern minimalist kitchen with marble countertops and sleek appliances",
     "lush private garden patio with tropical plants and soft ambient lighting",
