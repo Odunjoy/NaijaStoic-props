@@ -172,6 +172,9 @@ def generate_character_style(character_target: str, outfit_override: str = None)
     import random
     
     outfit = outfit_override or random.choice(OUTFIT_POOLS.get(character_target, OUTFIT_POOLS["odogwu"]))
+    hair = random.choice(HAIRSTYLES)
+    makeup = random.choice(MAKEUP)
+    acc = random.choice(ACCESSORIES)
     
     # Logic: Force formal shoes for "suit" or "blazer" or "tuxedo"
     is_formal = any(keyword in outfit.lower() for keyword in ["suit", "blazer", "tuxedo", "dress shirt", "pencil", "formal"])
