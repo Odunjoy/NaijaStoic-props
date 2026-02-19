@@ -42,14 +42,14 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
     1. **CHARACTER NAMES**: Change all names to common Nigerian names. 
        - **RECURRING FAMILY**: If the story features a Father, Mother, or Triplets, use the names "Odogwu (Dad)", "Amaka (Mom)", and "Triplets (Ngozi, Chioma, Princess)".
        - **OTHERS**: For any other roles, use unique Nigerian names.
-    2. **ONE IMAGE PER LOCATION**: The story MUST be written so that every scene within a location can take place using the SAME background image (The Location Setup Image). Scenes should focus on dialogue and motion within that frame.
+    2. **ONE IMAGE PER LOCATION**: Each location MUST be extracted from the actual transcript/story context. The `location_description` MUST be a rich, detailed, visually specific description of the actual setting (e.g. "a luxurious restaurant in Victoria Island Lagos, with white table cloths, dim candlelight, and floor-to-ceiling glass windows overlooking the harbor at night"). This description will be used directly to generate the background image. DO NOT use vague labels like 'kitchen' or 'office'. Every scene within a location reuses the SAME background image — focus on dialogue and character expressions.
     3. **DIALOGUE FORMAT**: Format all dialogue as: "[Character Name] says: [Dialogue]". 
        - Dialogue MUST be short (max 12-15 words) to fit under 6 seconds per scene.
     4. **NIGERIANIZATION**: Set in Nigeria with authentic Nigerian context and drama. Improve drama for viral impact.
     5. **SFX**: Include a relevant Sound Effect (SFX) for EVERY scene.
     6. **DUAL OUTPUT**: Generate assets for BOTH a "Long Video" (4 locations) and a "Short Video" (3-5 scenes).
     7. **LANGUAGE - STRICT RULE**: ALL dialogue MUST be written STRICTLY in {lang_desc}. This is NON-NEGOTIABLE. Do NOT mix languages. Do NOT switch to Pidgin if English is selected.
-    8. **MINIMAL MOVEMENT**: Characters MUST stay on one spot at all times while talking. Avoid "walking", "pacing", or "running" unless absolutely critical for the story. Focus only on facial expressions and hand gestures.
+    8. **ZERO CHARACTER MOVEMENT**: Characters MUST stay completely stationary at all times. They MUST NOT walk, pace, run, or move between scenes. Location changes happen via SCENE CUTS only — the scene just starts in a new place. Actions are ONLY facial expressions and hand gestures while standing still.
     
     OUTPUT FORMAT (JSON ONLY):
     {{
