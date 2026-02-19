@@ -1009,10 +1009,12 @@ def display_recreator_output(data: dict):
                 scene["location_context"] = loc_desc
                 m_prompt = generate_motion_prompt(scene, visual_context=st.session_state.get('style', 'default'), aesthetic_type=st.session_state.get('aesthetic_choice', '3D'))
                 
+                # Exact paragraph format requested: Scene X. Motion: ... Dialogue: ... SFX: ...
                 scene_block = f"Scene {s_idx + 1}. Motion: {m_prompt} Dialogue: {scene.get('dialogue')} SFX: {scene.get('sfx', 'N/A')}"
                 all_scenes_text.append(scene_block)
             
-            combined_location_text = " ".join(all_scenes_text)
+            # Use double space between scenes for better copy-paste separation in a single paragraph
+            combined_location_text = "  ".join(all_scenes_text)
             
             with st.expander(f"📋 Copy ALL {len(loc.get('scenes', []))} Scenes for this Location (Paragraph Format)"):
                 st.text_area(f"Bulk Copy Loc {loc_idx + 1}", combined_location_text, height=250, key=f"re_loc_bulk_{loc_idx}")
