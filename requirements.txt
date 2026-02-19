@@ -1,0 +1,9 @@
+streamlit==1.32.0
+google-generativeai>=0.8.3
+pandas==2.2.0
+python-dotenv==1.0.0
+requests
+yt-dlp
+opencv-python-headless
+youtube-transcript-api
+Pillow
