@@ -27,12 +27,17 @@ def generate_motion_prompt(scene: dict, visual_context: str = "", aesthetic_type
     aesthetic_note = "Maintain 2D aesthetic" if "2D" in aesthetic_type.upper() else "Maintain 3D aesthetic"
     base_motion = f"Stay on one spot at all times. Subtle movements only. {aesthetic_note}."
     
-    # Camera specific movement base
-    camera_movement = "No camera movement."
-    if "Close-up" in shot_type:
-        camera_movement = "Very slow subtle push in."
-    elif "Wide" in shot_type:
-        camera_movement = "Slow cinematic tracking shot."
+    # === AUTO CAMERA ANGLE ROTATION ===
+    # Cycles through 4 distinct camera angles based on scene position
+    # This makes the same image feel like 4 different shots
+    scene_position = ((scene_id - 1) % 4) + 1
+    camera_cycles = {
+        1: "Very slow subtle push-in toward the left side of frame, focusing on the speaking character.",
+        2: "Very slow subtle push-in toward the right side of frame, focusing on the reacting character.",
+        3: "Locked-off wide static shot. No camera movement. Both characters fully visible.",
+        4: "Slow subtle pan right across the frame, then settle. Cinematic drift."
+    }
+    camera_movement = camera_cycles.get(scene_position, "No camera movement.")
     
     # Character-specific motions - Prioritize extracted action
     action_desc = scene.get("action_description", "")
