@@ -81,10 +81,16 @@ OUTFIT_POOLS = {
     ]
 }
 
-# STYLING POOLS
-HAIRSTYLES = ["a neatly faded haircut", "braided cornrows", "an elegant low bun", "a stylish afro", "short natural hair"]
-MAKEUP = ["clean skin and natural look", "bold red lipstick and perfect contour", "shimmery eyeshadow and glossy lips", "a fresh-faced glow"]
-ACCESSORIES = ["a luxury wristwatch", "stylish eyeglasses", "a delicate gold necklace"]
+# STYLING POOLS (Character-Specific)
+MALE_HAIRSTYLES = ["a neatly faded haircut", "a short-cropped buzz cut", "a clean-shaven head", "a stylish low-fade"]
+FEMALE_HAIRSTYLES = ["braided cornrows", "an elegant low bun", "a stylish afro", "long flowing waves", "a sophisticated bob"]
+
+MALE_GROOMING = ["clean-shaven and fresh-faced", "a sharp well-groomed goatee", "a neatly trimmed beard", "looking clean with a fresh-faced appearance"]
+FEMALE_MAKEUP = ["bold red lipstick and perfect contour", "shimmery eyeshadow and glossy lips", "a fresh-faced natural glow", "elegant makeup with bold eyeliner"]
+
+MALE_ACC = ["a luxury wristwatch", "stylish eyeglasses", "a simple silver chain"]
+FEMALE_ACC = ["a delicate gold necklace", "stylish eyeglasses", "elegant gold hoop earrings"]
+
 SHOES = ["polished black loafers", "clean designer sneakers", "elegant pointed-toe high heels", "classic Oxford dress shoes", "sophisticated leather boots"]
 
 # LOCATION POOL (Diverse fallback locations)
@@ -172,24 +178,31 @@ def generate_character_style(character_target: str, outfit_override: str = None)
     import random
     
     outfit = outfit_override or random.choice(OUTFIT_POOLS.get(character_target, OUTFIT_POOLS["odogwu"]))
-    hair = random.choice(HAIRSTYLES)
-    makeup = random.choice(MAKEUP)
-    acc = random.choice(ACCESSORIES)
+    is_male = character_target in ["odogwu", "dad", "segun"]
+    
+    # Character-specific styling selection
+    if is_male:
+        hair = random.choice(MALE_HAIRSTYLES)
+        grooming = random.choice(MALE_GROOMING)
+        acc = random.choice(MALE_ACC)
+    else:
+        hair = random.choice(FEMALE_HAIRSTYLES)
+        makeup = random.choice(FEMALE_MAKEUP)
+        acc = random.choice(FEMALE_ACC)
     
     # Shoe Selection Logic (Gender-aware)
     is_formal = any(keyword in outfit.lower() for keyword in ["suit", "blazer", "tuxedo", "dress shirt", "pencil", "formal"])
-    is_male = character_target in ["odogwu", "dad", "segun"]
     
     if is_male:
         shoes = random.choice(["polished black loafers", "classic Oxford dress shoes", "sophisticated leather boots"]) if is_formal else random.choice(["clean designer sneakers", "polished black loafers"])
     else:
         shoes = random.choice(["elegant pointed-toe high heels", "polished black loafers"]) if is_formal else random.choice(["clean designer sneakers", "elegant high heels", "stylish flat shoes"])
     
-    # Antagonist gets more makeup emphasis, Odogwu gets more hair/acc emphasis
-    if character_target == "antagonist":
-        return f"wearing {outfit}, with {hair}, {makeup}, accessorized with {acc}, and wearing {shoes}. Clothes are perfectly fitted and tailored."
+    # Return formatted style description
+    if is_male:
+        return f"wearing {outfit}, with {hair}, {grooming}, accessorized with {acc}, and wearing {shoes}. Perfectly tailored for his muscular build."
     else:
-        return f"wearing {outfit}, with {hair}, looking clean with {makeup}, accessorized with {acc}, and wearing {shoes}. The suit is well-tailored for his muscular build."
+        return f"wearing {outfit}, with {hair}, looking glamorous with {makeup}, accessorized with {acc}, and wearing {shoes}. Perfectly fitted and elegant."
 
 
 def generate_base_character_prompt(character_type: str, animation_style: str = "3d_cgi", outfit_override: str = None) -> str:
