@@ -182,9 +182,11 @@ def generate_character_style(character_target: str, outfit_override: str = None)
     
     # Character-specific styling selection
     if is_male:
-        hair = random.choice(MALE_HAIRSTYLES)
+        # Note: Hair is intentionally NOT included for males
+        # because base_desc already defines the specific hairstyle (buzz cut, fade, etc.)
         grooming = random.choice(MALE_GROOMING)
         acc = random.choice(MALE_ACC)
+        hair = ""  # not used in male output below
     else:
         hair = random.choice(FEMALE_HAIRSTYLES)
         makeup = random.choice(FEMALE_MAKEUP)
@@ -198,9 +200,8 @@ def generate_character_style(character_target: str, outfit_override: str = None)
     else:
         shoes = random.choice(["elegant pointed-toe high heels", "polished black loafers"]) if is_formal else random.choice(["clean designer sneakers", "elegant high heels", "stylish flat shoes"])
     
-    # Return formatted style description
     if is_male:
-        return f"wearing {outfit}, with {hair}, {grooming}, accessorized with {acc}, and wearing {shoes}. Perfectly tailored for his muscular build."
+        return f"wearing {outfit}, {grooming}, accessorized with {acc}, and wearing {shoes}. Perfectly tailored for his muscular build."
     else:
         return f"wearing {outfit}, with {hair}, looking glamorous with {makeup}, accessorized with {acc}, and wearing {shoes}. Perfectly fitted and elegant."
 
@@ -259,8 +260,22 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     if style_desc:
         style_instruction = f"Visual Style: {style_desc}. {style_instruction}"
     
+    # Location-aware character positioning
+    # If the location implies seating (auditorium, restaurant, table, car, office, etc.)
+    # characters should be described as seated, not standing
+    seating_keywords = ["auditorium", "restaurant", "dining", "table", "seat", "car", "vehicle", "office desk", "cafe", "classroom", "lecture", "courtroom", "boardroom"]
+    location_lower = location_desc.lower()
+    is_seated_location = any(kw in location_lower for kw in seating_keywords)
+    
+    if is_seated_location:
+        positioning = f"Odogwu seated on the left side and Amaka seated on the right side of the frame"
+        posture_note = "Both characters are seated and fully visible from the waist up."
+    else:
+        positioning = f"Odogwu standing on the left side and Amaka standing on the right side of the frame"
+        posture_note = "Both characters are standing and fully visible."
+    
     # Strictly enforce positioning and Western attire
-    return f"""Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with Odogwu standing on the left side and Amaka standing on the right side of the frame. STRICT MANDATE: Characters must wear ONLY English Western style clothing (suites, shirts, jeans) - NO traditional wear or kaftans. Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."""
+    return f"""Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."""
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi") -> str:

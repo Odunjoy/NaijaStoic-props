@@ -48,22 +48,21 @@ def generate_motion_prompt(scene: dict, visual_context: str = "", aesthetic_type
         # Fallback to legacy static dictionary
         char_motion = get_character_motion(scene_id, character)
     
-    # Background ambient motion
-    bg_motion = get_background_motion(shot_type)
+    # Location-aware background ambient motion
+    location_ctx = scene.get("location_context", "").lower()
+    if any(kw in location_ctx for kw in ["auditorium", "lecture", "classroom"]):
+        bg_motion = "Background students in seats shifting slightly, ambient auditorium lighting."
+    elif any(kw in location_ctx for kw in ["restaurant", "dining", "cafe"]):
+        bg_motion = "Background diners subtly visible, soft restaurant ambient lighting, gentle clinking sounds implied."
+    elif any(kw in location_ctx for kw in ["office", "boardroom", "desk"]):
+        bg_motion = "Background office environment, subtle computer screens glowing, professional lighting."
+    elif any(kw in location_ctx for kw in ["bedroom", "room"]):
+        bg_motion = "Background soft bedroom ambient lighting, subtle curtain movement, warm glow."
+    elif any(kw in location_ctx for kw in ["outdoor", "garden", "rooftop", "atlantic", "view"]):
+        bg_motion = "Background subtle outdoor ambient, gentle breeze effect, natural light shifting."
+    else:
+        bg_motion = get_background_motion(shot_type)
     
-    # Integrate visual context if it contains relevant camera keywords
-    extra_instruction = ""
-    if visual_context:
-        v_ctx = visual_context.lower()
-        if "handheld" in v_ctx:
-            extra_instruction = " Handheld camera shake style."
-        elif "steady" in v_ctx or "smooth" in v_ctx:
-            extra_instruction = " Ultra smooth sleek stabilization."
-        elif "dynamic" in v_ctx:
-            extra_instruction = " Dynamic active camera motion."
-        elif "static" in v_ctx:
-            extra_instruction = " Tripod static shot."
-            
     # Construct full prompt
     motion_prompt = f"{char_motion} {bg_motion} {camera_movement}{extra_instruction} {base_motion}"
     
