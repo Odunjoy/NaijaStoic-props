@@ -50,52 +50,59 @@ def extract_frames_from_url(url, output_path="frames", num_frames=6):
         # Strategy 1: Use storyboard/heatmap thumbnails if available
         thumbnails = info.get('thumbnails', [])
         
-        # Filter to images only (not storyboards which are webp sequences)
+        # Filter to images only (not storyboards/ad images)
         image_thumbs = [
             t for t in thumbnails
-            if t.get('url') and
-            not any(x in t.get('url','') for x in ['storyboard', 'sb=', 'M'])
+            if t.get('url') and 'url' in t
         ]
         
-        # Sort by resolution descending and pick most distinct ones
-        image_thumbs.sort(key=lambda t: (t.get('width', 0) * t.get('height', 0)), reverse=True)
+        # Deduplicate by URL first
+        seen_urls = set()
+        unique_thumbs = []
+        for t in image_thumbs:
+            if t['url'] not in seen_urls:
+                seen_urls.add(t['url'])
+                unique_thumbs.append(t)
         
-        # Pick evenly spaced thumbnails to simulate scene extraction
-        if image_thumbs:
-            # Deduplicate by URL
-            seen_urls = set()
-            unique_thumbs = []
-            for t in image_thumbs:
-                if t['url'] not in seen_urls:
-                    seen_urls.add(t['url'])
-                    unique_thumbs.append(t)
-            
-            # Select num_frames evenly spaced
-            step = max(1, len(unique_thumbs) // num_frames)
-            selected = unique_thumbs[::step][:num_frames]
-            
-            # If we have fewer than requested, pad with the main thumbnail
-            if not selected:
-                thumb_url = info.get('thumbnail')
-                if thumb_url:
-                    selected = [{'url': thumb_url}] * min(num_frames, 3)
+        # Sort by resolution so we pick the best quality distinct images
+        unique_thumbs.sort(key=lambda t: (t.get('width', 0) * t.get('height', 0)), reverse=True)
+        
+        # Cap to what's actually available — NO repeating/padding
+        actual_count = min(num_frames, len(unique_thumbs))
+        if actual_count == 0:
+            # Last resort: use only the main thumbnail, just once
+            main_thumb = info.get('thumbnail')
+            if main_thumb:
+                unique_thumbs = [{'url': main_thumb}]
+                actual_count = 1
+        
+        # Pick evenly spread across the available pool to maximise variety
+        if unique_thumbs:
+            if actual_count >= len(unique_thumbs):
+                selected = unique_thumbs  # take all available
+            else:
+                step = len(unique_thumbs) / actual_count
+                selected = [unique_thumbs[int(i * step)] for i in range(actual_count)]
         else:
-            # Fallback: just use the main thumbnail duplicated
-            thumb_url = info.get('thumbnail')
-            selected = [{'url': thumb_url}] * min(num_frames, 1) if thumb_url else []
+            selected = []
         
-        # Download the selected thumbnail images
+        # Download selected thumbnails — track content hashes to skip true duplicates
         headers = {'User-Agent': 'Mozilla/5.0'}
+        seen_hashes = set()
         for i, thumb in enumerate(selected):
             try:
                 resp = requests.get(thumb['url'], headers=headers, timeout=10)
                 if resp.status_code == 200:
-                    frame_path = os.path.join(output_path, f"frame_{i+1}.jpg")
+                    content_hash = hash(resp.content)
+                    if content_hash in seen_hashes:
+                        continue  # skip identical image content
+                    seen_hashes.add(content_hash)
+                    frame_path = os.path.join(output_path, f"frame_{len(extracted_paths)+1}.jpg")
                     with open(frame_path, 'wb') as f:
                         f.write(resp.content)
                     extracted_paths.append(frame_path)
             except Exception as e:
-                print(f"Frame {i+1} download error: {e}")
+                print(f"Frame download error: {e}")
         
     except Exception as e:
         print(f"Error extracting frames: {e}")
