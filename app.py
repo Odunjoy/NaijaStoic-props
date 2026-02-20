@@ -888,35 +888,75 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         if "pov" in scene:
             camera_pov = scene['pov'].get('camera_perspective', 'N/A').replace("\n", " ").strip()
         
-        # Identify character gender with strict word matching
-        char_field = f" {scene.get('character', '').lower()} "
-        scene_id = scene.get('scene_id', 1)
+        # ── GENDER DETECTION (3 layers, most reliable first) ────────────────
+        # Layer 1: Read the explicit 'gender' field the AI now provides
+        scene_gender_field = scene.get('gender', '').lower().strip()
         
-        # Priority 1: Direct character labels
-        if "antagonist" in char_field or "chioma" in char_field:
+        if scene_gender_field == 'female':
             is_female = True
             is_male = False
-        elif "protagonist" in char_field or "odogwu" in char_field:
+        elif scene_gender_field == 'male':
             is_female = False
             is_male = True
         else:
-            # Priority 2: Keyword scanning with word boundaries
-            female_keywords = ["woman", "female", "she", "lady", "girl"]
-            male_keywords = ["man", "male", "he", "guy", "boy"]
+            # Layer 2: Comprehensive Nigerian name registry
+            char_name = scene.get('character', '').lower().strip()
             
-            # Using spaces as simple word boundaries for speed in Streamlit
-            is_female = any(f" {k} " in char_field for k in female_keywords)
-            # Ensure "he" doesn't catch "she"
-            is_male = any(f" {k} " in char_field for k in male_keywords) and not is_female
+            # Known female names the AI uses (recurring + common Nigerian female names)
+            FEMALE_NAMES = {
+                "antagonist", "chioma", "amaka", "ngozi", "princess", "triplet",
+                "mom", "mother", "amara", "trixie", "sister", "aunty", "auntie",
+                "funmi", "bimpe", "sola", "kemi", "yetunde", "folake", "adaeze",
+                "adaobi", "ifeoma", "obiageli", "tosin", "bisi", "shade", "omowunmi",
+                "chiamaka", "blessing", "grace", "favour", "patience", "joy",
+                "mercy", "precious", "gift", "stephanie", "temi", "yemi", "lola",
+                "ronke", "bolanle", "jumoke", "bukola", "nike"
+            }
+            # Known male names
+            MALE_NAMES = {
+                "odogwu", "protagonist", "dad", "father", "segun", "emeka",
+                "chukwuemeka", "tunde", "biodun", "gbenga", "niyi", "rotimi",
+                "femi", "kunle", "deji", "wale", "dare", "soji", "jide",
+                "bola", "lanre", "hakeem", "musa", "ibrahim", "chidi", "ifeanyi",
+                "obinna", "ikechukwu", "nnamdi", "chinedu", "charles", "victor",
+                "samuel", "david", "daniel", "peter", "paul", "john", "james",
+                "brother", "uncle"
+            }
             
-            # Fallback based on scene structure
-            if not is_female and not is_male:
-                if 1 <= scene_id <= 6:
-                    is_female = True
-                    is_male = False
-                else:
-                    is_female = False
-                    is_male = True
+            # Check against registries (match any word in the character field)
+            char_words = set(char_name.replace(",", " ").replace("(", " ").replace(")", " ").split())
+            
+            if char_words & FEMALE_NAMES:
+                is_female = True
+                is_male = False
+            elif char_words & MALE_NAMES:
+                is_female = False
+                is_male = True
+            else:
+                # Layer 3: Keyword scanning (last resort)
+                female_keywords = ["woman", "female", "girl", "lady"]
+                male_keywords = ["man", "male", "guy", "boy"]
+                char_field_padded = f" {char_name} "
+                is_female = any(f" {k} " in char_field_padded for k in female_keywords)
+                is_male = any(f" {k} " in char_field_padded for k in male_keywords) and not is_female
+                
+                # Ultimate fallback: inspect dialogue for "says:" prefix name
+                if not is_female and not is_male:
+                    dialogue_text = scene.get('dialogue', '').lower()
+                    diag_name = dialogue_text.split(" says:")[0].strip() if " says:" in dialogue_text else ""
+                    if diag_name:
+                        diag_words = set(diag_name.replace(",", " ").split())
+                        if diag_words & FEMALE_NAMES:
+                            is_female = True
+                            is_male = False
+                        else:
+                            is_female = False
+                            is_male = True
+                    else:
+                        # Absolute last resort: default to male
+                        is_female = False
+                        is_male = True
+        # ── END GENDER DETECTION ─────────────────────────────────────────────
         
         dialogue = scene.get('dialogue', '').strip()
         voice_spec = ""

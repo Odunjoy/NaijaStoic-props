@@ -68,6 +68,7 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
               {{
                 "scene_id": 1,
                 "character": "name",
+                "gender": "male or female — MANDATORY, must match the character's actual sex",
                 "action_description": "POSTURE-AWARE action: If location is a seated setting (auditorium, restaurant, car, etc.) → describe only seated actions (e.g. 'shifts in seat', 'leans toward other character'). If standing location → describe only standing gestures. NEVER include walking or movement between positions.",
                 "dialogue": "[Name] says: [Dialogue]",
                 "sfx": "Short SFX description (e.g., Dramatic boom, car door slam, marketplace noise)"
@@ -85,6 +86,7 @@ def recreate_story(transcript: str, language_style: str = "pidgin", google_api_k
           {{
             "scene_id": 1,
             "character": "name",
+            "gender": "male or female — MANDATORY, must match the character's actual sex",
             "action_description": "Quick action",
             "dialogue": "[Name] says: [Dialogue]",
             "sfx": "Relevant SFX"
