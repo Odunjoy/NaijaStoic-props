@@ -888,73 +888,78 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         if "pov" in scene:
             camera_pov = scene['pov'].get('camera_perspective', 'N/A').replace("\n", " ").strip()
         
-        # ── GENDER DETECTION (3 layers, most reliable first) ────────────────
-        # Layer 1: Read the explicit 'gender' field the AI now provides
-        scene_gender_field = scene.get('gender', '').lower().strip()
-        
-        if scene_gender_field == 'female':
+        # ── GENDER DETECTION (4 layers, Layer 0 = most reliable) ────────────
+        import re as _re
+        FEMALE_NAMES = {
+            "antagonist","chioma","amaka","ngozi","princess","triplet",
+            "mom","mother","amara","trixie","sister","aunty","auntie",
+            "funmi","bimpe","sola","kemi","yetunde","folake","adaeze",
+            "adaobi","ifeoma","obiageli","tosin","bisi","shade","omowunmi",
+            "chiamaka","blessing","grace","favour","patience","joy",
+            "mercy","precious","gift","stephanie","temi","yemi","lola",
+            "ronke","bolanle","jumoke","bukola","nike"
+        }
+        MALE_NAMES = {
+            "odogwu","protagonist","dad","father","segun","emeka",
+            "chukwuemeka","tunde","biodun","gbenga","niyi","rotimi",
+            "femi","kunle","deji","wale","dare","soji","jide",
+            "bola","lanre","hakeem","musa","ibrahim","chidi","ifeanyi",
+            "obinna","ikechukwu","nnamdi","chinedu","charles","victor",
+            "samuel","david","daniel","peter","paul","john","james",
+            "brother","uncle"
+        }
+        # Antagonist (female) phases — scenes 1-6 in Standard Transformer
+        FEMALE_PHASES = {"hook","setup","conflict","pressure","escalation",
+                         "challenge","manipulation","entitlement","complaint","demand"}
+        # Protagonist (male) phases — scenes 7+ in Standard Transformer
+        MALE_PHASES   = {"reframe","resolution","pivot","logic","truth","lesson",
+                         "counter","wisdom","stoic","response","reversal","final"}
+
+        is_female = False
+        is_male   = False
+
+        # Layer 0: phase field (Standard Transformer always sets this — MOST RELIABLE)
+        phase_raw = scene.get('phase', '').lower().strip()
+        if any(p in phase_raw for p in FEMALE_PHASES):
             is_female = True
-            is_male = False
-        elif scene_gender_field == 'male':
-            is_female = False
+        elif any(p in phase_raw for p in MALE_PHASES):
             is_male = True
-        else:
-            # Layer 2: Comprehensive Nigerian name registry
-            char_name = scene.get('character', '').lower().strip()
-            
-            # Known female names the AI uses (recurring + common Nigerian female names)
-            FEMALE_NAMES = {
-                "antagonist", "chioma", "amaka", "ngozi", "princess", "triplet",
-                "mom", "mother", "amara", "trixie", "sister", "aunty", "auntie",
-                "funmi", "bimpe", "sola", "kemi", "yetunde", "folake", "adaeze",
-                "adaobi", "ifeoma", "obiageli", "tosin", "bisi", "shade", "omowunmi",
-                "chiamaka", "blessing", "grace", "favour", "patience", "joy",
-                "mercy", "precious", "gift", "stephanie", "temi", "yemi", "lola",
-                "ronke", "bolanle", "jumoke", "bukola", "nike"
-            }
-            # Known male names
-            MALE_NAMES = {
-                "odogwu", "protagonist", "dad", "father", "segun", "emeka",
-                "chukwuemeka", "tunde", "biodun", "gbenga", "niyi", "rotimi",
-                "femi", "kunle", "deji", "wale", "dare", "soji", "jide",
-                "bola", "lanre", "hakeem", "musa", "ibrahim", "chidi", "ifeanyi",
-                "obinna", "ikechukwu", "nnamdi", "chinedu", "charles", "victor",
-                "samuel", "david", "daniel", "peter", "paul", "john", "james",
-                "brother", "uncle"
-            }
-            
-            # Check against registries (match any word in the character field)
-            char_words = set(char_name.replace(",", " ").replace("(", " ").replace(")", " ").split())
-            
+
+        if not is_female and not is_male:
+            # Layer 1: explicit 'gender' field (Recreator Engine scenes)
+            gf = scene.get('gender', '').lower().strip()
+            if gf == 'female':
+                is_female = True
+            elif gf == 'male':
+                is_male = True
+
+        if not is_female and not is_male:
+            # Layer 2: character name registry
+            char_name  = scene.get('character', '').lower().strip()
+            char_words = set(char_name.replace(","," ").replace("("," ").replace(")"," ").split())
             if char_words & FEMALE_NAMES:
                 is_female = True
-                is_male = False
             elif char_words & MALE_NAMES:
-                is_female = False
                 is_male = True
-            else:
-                # Layer 3: Keyword scanning (last resort)
-                female_keywords = ["woman", "female", "girl", "lady"]
-                male_keywords = ["man", "male", "guy", "boy"]
-                char_field_padded = f" {char_name} "
-                is_female = any(f" {k} " in char_field_padded for k in female_keywords)
-                is_male = any(f" {k} " in char_field_padded for k in male_keywords) and not is_female
-                
-                # Ultimate fallback: inspect dialogue for "says:" prefix name
-                if not is_female and not is_male:
-                    dialogue_text = scene.get('dialogue', '').lower()
-                    diag_name = dialogue_text.split(" says:")[0].strip() if " says:" in dialogue_text else ""
-                    if diag_name:
-                        diag_words = set(diag_name.replace(",", " ").split())
-                        if diag_words & FEMALE_NAMES:
-                            is_female = True
-                            is_male = False
-                        else:
-                            is_female = False
-                            is_male = True
+
+        if not is_female and not is_male:
+            # Layer 3: keyword scan + dialogue inspection
+            char_name = scene.get('character', '').lower().strip()
+            fp = f" {char_name} "
+            is_female = any(f" {k} " in fp for k in ["woman","female","girl","lady"])
+            is_male   = any(f" {k} " in fp for k in ["man","male","guy","boy"]) and not is_female
+            if not is_female and not is_male:
+                dl = scene.get('dialogue','').lower()
+                if " says:" in dl:
+                    dn = dl.split(" says:")[0].strip()
+                    is_female = bool(set(dn.split()) & FEMALE_NAMES)
+                    is_male   = not is_female
+                else:
+                    # last resort: scenes 1-6 antagonist intro block
+                    sid = scene.get('scene_id', 99)
+                    if isinstance(sid, int) and 1 <= sid <= 6:
+                        is_female = True
                     else:
-                        # Absolute last resort: default to male
-                        is_female = False
                         is_male = True
         # ── END GENDER DETECTION ─────────────────────────────────────────────
         
@@ -987,7 +992,11 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
             raw_img = re.sub(r'Visual Style:[^.]+\.', '', raw_img)
             # Remove "Features eye-level..." or similar style continuation sentences
             raw_img = re.sub(r'Features [^.]+\.', '', raw_img)
-            img_prompt_clean = re.sub(r'\s{2,}', ' ', raw_img).strip(', . ')
+            img_prompt_clean = re.sub(r'\s{2,}', ' ', raw_img).strip()
+            img_prompt_clean = re.sub(r'^[,. ]+|[,. ]+$', '', img_prompt_clean).strip()
+            # Remove any leftover standalone dot sequences like ". ." or ".. "
+            img_prompt_clean = re.sub(r'(\s*\.\s*){2,}', '. ', img_prompt_clean).strip(". ")
+
             
             # ── STRIP background ambient + camera movement from motion ────────
             # Keep only: "Facial expressions matching dialogue emotion."
@@ -1037,7 +1046,7 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
     if "video_metadata" in output and "final_lesson" in output["video_metadata"]:
         lesson = output["video_metadata"]["final_lesson"]
         lesson_pov = "[Final close-up - Odogwu's perspective, steady, eye level from Chioma's position] Final close-up"
-        lesson_block = f"{MALE_VOICE_SPEC} {lesson_pov}, He says: {lesson}"
+        lesson_block = f"{MALE_VOICE_SPEC} {lesson_pov}, HE SAYS: {lesson}"
         scene_prompts.append(lesson_block)
     
     join_str = "\n\n" if double_spaced else "\n"
