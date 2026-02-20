@@ -971,10 +971,62 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                 gender_prefix = "He says: "
         
         if condensed:
-            # Use action directly and condensed img prompt
             action = scene.get('action_description', '').replace("\n", " ").strip()
-            img_prompt = scene.get('condensed_prompt', '').replace("\n", " ").strip()
-            scene_block = f"{voice_spec} [{camera_pov}] {scene.get('shot_type')}, {gender_prefix}{dialogue}, {img_prompt}, Character action: {action}, {motion} {sfx}"
+            
+            # ── STRIP unwanted parts from img_prompt ─────────────────────────
+            # img_prompt may contain: "Background is a [loc].. Visual Style: [style].."
+            # We want to keep: character description + animation base style (3D CGI...)
+            raw_img = scene.get('condensed_prompt', '') or scene.get('image_prompt', '')
+            raw_img = raw_img.replace("\n", " ").strip()
+            
+            # Remove "Background is a ..." sentence (ends at next period or "Visual Style")
+            import re
+            raw_img = re.sub(r'Background is a[^.]+\.', '', raw_img)
+            raw_img = re.sub(r'Background is an?[^.]+\.', '', raw_img)
+            # Remove "Visual Style: ..." sentence (ends at next period or next known tag)
+            raw_img = re.sub(r'Visual Style:[^.]+\.', '', raw_img)
+            # Remove "Features eye-level..." or similar style continuation sentences
+            raw_img = re.sub(r'Features [^.]+\.', '', raw_img)
+            img_prompt_clean = re.sub(r'\s{2,}', ' ', raw_img).strip(', . ')
+            
+            # ── STRIP background ambient + camera movement from motion ────────
+            # Keep only: "Facial expressions matching dialogue emotion."
+            #             "Maintain 3D aesthetic."
+            # Remove everything else (Background..., camera push/pan/lock lines,
+            #          "Stay on one spot", "Subtle movements only")
+            raw_motion = motion  # already cleaned of newlines above
+            
+            # Break into sentences and filter
+            motion_sentences = re.split(r'(?<=[.!?])\s+', raw_motion)
+            KEEP_PHRASES = ["facial expressions", "maintain 3d", "maintain the 3d"]
+            STRIP_PHRASES = [
+                "background ", "very slow", "slow subtle", "locked-off", "slow cinematic",
+                "pan right", "push-in", "push in", "camera", "stay on one spot",
+                "subtle movements only", "no camera", "tripod"
+            ]
+            kept_motion = []
+            for sent in motion_sentences:
+                s_lower = sent.lower()
+                if any(k in s_lower for k in KEEP_PHRASES):
+                    kept_motion.append(sent.strip())
+                elif any(bad in s_lower for bad in STRIP_PHRASES):
+                    continue  # skip this sentence
+                else:
+                    kept_motion.append(sent.strip())
+            motion_clean = " ".join(kept_motion).strip()
+            
+            # ── GENDER PREFIX ─────────────────────────────────────────────────
+            gender_label = "SHE SAYS:" if is_female else "HE SAYS:"
+            
+            scene_block = (
+                f"{voice_spec} "
+                f"[{camera_pov}] {scene.get('shot_type')}, "
+                f"{gender_label} {dialogue}, "
+                f"{img_prompt_clean}, "
+                f"Character action: {action}. "
+                f"{motion_clean} "
+                f"{sfx}"
+            )
         else:
             # Full logic
             scene_block = f"{voice_spec} [{camera_pov}] {scene.get('shot_type')}, {gender_prefix}{dialogue}, {img_prompt}, {motion} {sfx}"
