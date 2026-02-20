@@ -1018,15 +1018,16 @@ def display_recreator_output(data: dict):
         st.subheader("🎬 Long Video Scenes")
         
         current_style_label = "2D Lofi Anime" if st.session_state.get('animation_style') == '2d_lofi' else "3D CGI Animation"
-        visual_ctx = {"style": current_style_label, "location": "Nigeria"}
         global_scene_idx = 0
         
         for loc_idx, loc in enumerate(long_data.get("locations", [])):
             loc_desc = loc.get("location_description", "Unknown Location")
             st.markdown(f"#### 📍 Location {loc_idx + 1}: {loc_desc}")
             
-            # NEW: Generate and display Location Setup Prompt
-            # Pass loc_desc into setup prompt generation
+            # Build visual_ctx using this location's actual description (not generic 'Nigeria')
+            visual_ctx = {"style": current_style_label, "location": loc_desc}
+            
+            # Generate and display Location Setup Prompt with correct posture for this location
             setup_prompt = generate_scene_setup_prompt(
                 animation_style=st.session_state.get('animation_style', '3d_cgi'),
                 visual_context={"location": loc_desc, "style": current_style_label}

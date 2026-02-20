@@ -278,12 +278,41 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     return f"""Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."""
 
 
-def generate_establishing_shot(animation_style: str = "3d_cgi") -> str:
+def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: str = None) -> str:
     """
     Generate the location establishing shot prompt.
+    Uses location_desc to determine correct posture across 3 types:
+      - Both seated   (auditorium, restaurant, car, classroom...)
+      - One each      (counter, reception, shop, bar... — power/service dynamic)
+      - Both standing (hallway, street, living room...)
     """
     style = ANIMATION_STYLES.get(animation_style, ANIMATION_STYLES["3d_cgi"])
-    return f"Location: Full image of both characters standing in a {DEFAULT_LOCATION}. {style['base_style']}, {style['aspect_ratio']}."
+    loc = location_desc or DEFAULT_LOCATION
+    loc_lower = loc.lower()
+
+    # Fully seated environments
+    seated_kws = ["auditorium", "restaurant", "dining", "table", "seat", "car",
+                  "vehicle", "office desk", "cafe", "classroom", "lecture",
+                  "courtroom", "boardroom", "bench", "cinema", "church pew"]
+    # Mixed environments (one behind a counter/desk, one on the other side)
+    mixed_kws = ["counter", "reception", "bar ", "shop", "store", "bank",
+                 "checkout", "front desk", "hospital bed", "market stall"]
+
+    if any(kw in loc_lower for kw in mixed_kws):
+        posture = "Odogwu standing on the left side, Amaka seated or behind a counter on the right side"
+        posture_note = "One character standing, one seated — establishing the interaction dynamic."
+    elif any(kw in loc_lower for kw in seated_kws):
+        posture = "both Odogwu and Amaka seated, Odogwu on the left, Amaka on the right"
+        posture_note = "Both characters are fully seated and visible from the waist up."
+    else:
+        posture = "both Odogwu and Amaka standing, Odogwu on the left, Amaka on the right"
+        posture_note = "Both characters are standing and fully visible."
+
+    return (
+        f"Establishing Shot — Wide angle full view: {posture} in a {loc}. "
+        f"{posture_note} STRICT MANDATE: English Western style clothing ONLY — NO traditional wear. "
+        f"{style['base_style']}, {style['aspect_ratio']}."
+    )
 
 
 def generate_image_prompt(scene: dict, variation: str = "default", animation_style: str = "3d_cgi", visual_context: dict = None, outfit_override: dict = None) -> str:
