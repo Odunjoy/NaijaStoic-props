@@ -218,7 +218,7 @@ def generate_base_character_prompt(character_type: str, animation_style: str = "
     return f"{char['display_name']}: {char['base_desc']}, {outfit}. {style['base_style']}, {style['aspect_ratio']}."
 
 
-def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: dict = None, visual_context: dict = None) -> str:
+def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: dict = None, visual_context: dict = None, reference_image: str = None) -> str:
     """
     Generate a comprehensive scene setup prompt that establishes the environment.
     Uses Character Anchors for Dad and Mom to ensure consistency.
@@ -228,6 +228,9 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     
     if story_context is None:
         story_context = {"prop_description": "", "outfit_changes": {}}
+        
+    # Handle reference image
+    ref_part = f"Reference Image: {reference_image}. " if reference_image else ""
         
     # Handle visual context
     if isinstance(visual_context, dict):
@@ -275,7 +278,7 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
         posture_note = "Both characters are standing and fully visible."
     
     # Strictly enforce positioning and Western attire
-    return f"""Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."""
+    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: str = None) -> str:

@@ -500,6 +500,7 @@ def build_complete_output(scenes: list, seo_data: dict, style_variation: str, an
     """
     Build the complete JSON output package with comprehensive metadata and POV.
     """
+    import streamlit as st
     
     # Extract story context from original script (look for key objects/topics)
     story_context = extract_story_context(original_script)
@@ -519,10 +520,18 @@ def build_complete_output(scenes: list, seo_data: dict, style_variation: str, an
         language_style=st.session_state.get('language_style', 'pidgin')
     )
     
+    # Use the first extracted YouTube frame as a reference for Scene Setup if available
+    reference_frame = None
+    if 'extracted_frames' in st.session_state and st.session_state['extracted_frames']:
+        reference_frame = st.session_state['extracted_frames'][0]
+        # Make the path cleaner for display if it's absolute
+        if os.path.isabs(reference_frame):
+            reference_frame = os.path.basename(reference_frame)
+
     output = {
         "video_metadata": video_meta,
         "seo_data": enhanced_seo,
-        "scene_setup": generate_scene_setup_prompt(animation_style, story_context, visual_context),
+        "scene_setup": generate_scene_setup_prompt(animation_style, story_context, visual_context, reference_image=reference_frame),
         "props": generate_props(animation_style, story_context, visual_context, locations=locations),
         "scenes": []
     }
@@ -979,33 +988,21 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
             action = scene.get('action_description', '').replace("\n", " ").strip()
             
             # ── STRIP unwanted parts from img_prompt ─────────────────────────
-            # img_prompt may contain: "Background is a [loc].. Visual Style: [style].."
-            # We want to keep: character description + animation base style (3D CGI...)
             raw_img = scene.get('condensed_prompt', '') or scene.get('image_prompt', '')
             raw_img = raw_img.replace("\n", " ").strip()
             
-            # Remove "Background is a ..." sentence (ends at next period or "Visual Style")
             import re
             raw_img = re.sub(r'Background is a[^.]+\.', '', raw_img)
             raw_img = re.sub(r'Background is an?[^.]+\.', '', raw_img)
-            # Remove "Visual Style: ..." sentence (ends at next period or next known tag)
             raw_img = re.sub(r'Visual Style:[^.]+\.', '', raw_img)
-            # Remove "Features eye-level..." or similar style continuation sentences
             raw_img = re.sub(r'Features [^.]+\.', '', raw_img)
             img_prompt_clean = re.sub(r'\s{2,}', ' ', raw_img).strip()
             img_prompt_clean = re.sub(r'^[,. ]+|[,. ]+$', '', img_prompt_clean).strip()
-            # Remove any leftover standalone dot sequences like ". ." or ".. "
             img_prompt_clean = re.sub(r'(\s*\.\s*){2,}', '. ', img_prompt_clean).strip(". ")
 
-            
             # ── STRIP background ambient + camera movement from motion ────────
-            # Keep only: "Facial expressions matching dialogue emotion."
-            #             "Maintain 3D aesthetic."
-            # Remove everything else (Background..., camera push/pan/lock lines,
-            #          "Stay on one spot", "Subtle movements only")
             raw_motion = motion  # already cleaned of newlines above
             
-            # Break into sentences and filter
             motion_sentences = re.split(r'(?<=[.!?])\s+', raw_motion)
             KEEP_PHRASES = ["facial expressions", "maintain 3d", "maintain the 3d"]
             STRIP_PHRASES = [
@@ -1019,7 +1016,7 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                 if any(k in s_lower for k in KEEP_PHRASES):
                     kept_motion.append(sent.strip())
                 elif any(bad in s_lower for bad in STRIP_PHRASES):
-                    continue  # skip this sentence
+                    continue
                 else:
                     kept_motion.append(sent.strip())
             motion_clean = " ".join(kept_motion).strip()
@@ -1027,8 +1024,8 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
             # ── GENDER PREFIX ─────────────────────────────────────────────────
             gender_label = "SHE SAYS:" if is_female else "HE SAYS:"
             
+            # Voice spec is NOT added here — it is emitted once per gender block below
             scene_block = (
-                f"{voice_spec} "
                 f"[{camera_pov}] {scene.get('shot_type')}, "
                 f"{gender_label} {dialogue}, "
                 f"{img_prompt_clean}, "
@@ -1036,21 +1033,52 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                 f"{motion_clean} "
                 f"{sfx}"
             )
+            # Tag the block with gender so we can group voice specs later
+            scene_block = (scene_block, "female" if is_female else "male")
         else:
             # Full logic
             scene_block = f"{voice_spec} [{camera_pov}] {scene.get('shot_type')}, {gender_prefix}{dialogue}, {img_prompt}, {motion} {sfx}"
         
         scene_prompts.append(scene_block)
     
-    # Add Final Lesson
+    # Add Final Lesson (always plain string, not a tuple)
     if "video_metadata" in output and "final_lesson" in output["video_metadata"]:
         lesson = output["video_metadata"]["final_lesson"]
         lesson_pov = "[Final close-up - Odogwu's perspective, steady, eye level from Chioma's position] Final close-up"
-        lesson_block = f"{MALE_VOICE_SPEC} {lesson_pov}, HE SAYS: {lesson}"
+        if condensed:
+            # For condensed mode, tag as male tuple (spec will be handled below)
+            lesson_block = (f"{lesson_pov}, HE SAYS: {lesson}", "male")
+        else:
+            lesson_block = f"{MALE_VOICE_SPEC} {lesson_pov}, HE SAYS: {lesson}"
         scene_prompts.append(lesson_block)
     
     join_str = "\n\n" if double_spaced else "\n"
-    return join_str.join(scene_prompts)
+    
+    if condensed:
+        # scene_prompts is a list of (text, gender) tuples.
+        # Emit voice spec ONCE per gender group transition.
+        output_lines = []
+        last_gender = None
+        for item in scene_prompts:
+            if isinstance(item, tuple):
+                text, gender = item
+            else:
+                # Fallback: plain string (shouldn't happen in condensed, but be safe)
+                output_lines.append(item)
+                last_gender = None
+                continue
+            
+            if gender != last_gender:
+                # Gender changed — emit the appropriate voice spec header
+                spec = FEMALE_VOICE_SPEC if gender == "female" else MALE_VOICE_SPEC
+                output_lines.append(spec)
+                last_gender = gender
+            
+            output_lines.append(text)
+        
+        return join_str.join(output_lines)
+    else:
+        return join_str.join(scene_prompts)
 
 
 def display_recreator_output(data: dict):
