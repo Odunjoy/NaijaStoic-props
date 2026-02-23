@@ -24,7 +24,8 @@ def parse_scenes(transformed_dialogue: list, story_mode: str = "single") -> list
         10: {"shot_type": "Close-up (Odogwu)", "camera_angle": "Close-up", "phase": "Dunk", "character": "protagonist", "duration": "63-70s"},
         11: {"shot_type": "Medium shot (Odogwu)", "camera_angle": "Medium", "phase": "Dunk", "character": "protagonist", "duration": "70-77s"},
         12: {"shot_type": "Wide shot (Odogwu & Chioma)", "camera_angle": "Wide", "phase": "Dunk", "character": "protagonist", "duration": "77-84s"},
-        13: {"shot_type": "Final Close-up (Odogwu)", "camera_angle": "Close-up", "phase": "Dunk", "character": "protagonist", "duration": "84-91s"}
+        13: {"shot_type": "Medium shot (Odogwu)", "camera_angle": "Medium", "phase": "Dunk", "character": "protagonist", "duration": "84-91s"},
+        14: {"shot_type": "Final Close-up (Odogwu)", "camera_angle": "Close-up", "phase": "Dunk", "character": "protagonist", "duration": "91-98s"}
     }
     
     # Simple dynamic template fallback for multi-mode or unexpected counts
@@ -90,12 +91,12 @@ def validate_scene_structure(scenes: list) -> dict:
     
     issues = []
     
-    # Check we have exactly 13 scenes
-    if len(scenes) != 13:
-        issues.append(f"Expected 13 scenes, got {len(scenes)}")
+    # Check we have exactly 14 scenes
+    if len(scenes) != 14:
+        issues.append(f"Expected 14 scenes, got {len(scenes)}")
     
     # Check scene IDs are sequential
-    expected_ids = list(range(1, 14))
+    expected_ids = list(range(1, 15))
     actual_ids = [scene.get("scene_id") for scene in scenes]
     
     if actual_ids != expected_ids:
@@ -158,22 +159,23 @@ def get_scene_beats(scenes: list) -> dict:
         10: "Dunk - Logic begins",
         11: "Dunk - Nigerian context",
         12: "Dunk - Conclusion",
-        13: "Dunk - Mic drop"
+        13: "Conclusion - Takedown summary",
+        14: "Lesson - Final mic drop + CTA"
     }
     
     return {scene["scene_id"]: beats.get(scene["scene_id"], "Unknown") for scene in scenes}
 
 
 if __name__ == "__main__":
-    # Test scene parsing with 13 scenes
+    # Test scene parsing with 14 scenes
     test_scenes = [
         {"scene_id": i, "dialogue": f"Test dialogue for scene {i}"} 
-        for i in range(1, 14)
+        for i in range(1, 15)
     ]
     
     parsed = parse_scenes(test_scenes)
     
-    print("✅ Parsed 13 Scenes:")
+    print("✅ Parsed 14 Scenes:")
     for scene in parsed:
         print(f"\nScene {scene['scene_id']}: {scene['shot_type']} ({scene['phase']})")
         print(f"Duration: {scene['duration']}")

@@ -174,6 +174,14 @@ def transform_script(original_script: str, language_style: str = "pidgin", googl
                     "dialogue": "..."
                 },
                 ...
+                {
+                    "scene_id": 14,
+                    "phase": "Lesson",
+                    "character": "protagonist", 
+                    "camera_angle": "Close-up",
+                    "action_description": "...",
+                    "dialogue": "..."
+                }
             ]
         }
         """
@@ -192,7 +200,7 @@ Requirements:
 {mode_instruction}
 5. Use Nigerian cultural references (Lagos, Lekki, etc.)
 6. Convert currency to Naira
-7. CRITICAL: Each scene = 10-15 words MAX (7-second dialogue)
+7. CRITICAL: Each scene dialogue MUST BE EXACTLY 10-15 words MAX (7-second dialogue). ABSOLUTELY NO MORE THAN 15 WORDS per scene to fit the timeframe.
 8. **Analyze the script's visual context** to create detailed setting description(s).
 9. **Describe specific character actions** for every scene.
 10. **MAINTAIN VISUAL CONTINUITY** within each location.
@@ -212,7 +220,7 @@ End the FINAL scene's dialogue with a Stoic lesson that begins with the words: "
         transformed_text = response.text.strip()
         
         # Parse the response (JSON)
-        result_data = parse_transformed_script(transformed_text)
+        result_data = parse_transformed_script(transformed_text, story_mode)
         
         return {
             "success": True,
@@ -233,7 +241,7 @@ End the FINAL scene's dialogue with a Stoic lesson that begins with the words: "
         }
 
 
-def parse_transformed_script(text: str) -> dict:
+def parse_transformed_script(text: str, story_mode: str = "single") -> dict:
     """
     Parse the AI input which should be JSON, but handle fallback if it's not.
     """
@@ -253,6 +261,13 @@ def parse_transformed_script(text: str) -> dict:
         if start_idx != -1 and end_idx != -1:
             json_str = cleaned_text[start_idx:end_idx+1]
             data = json.loads(json_str)
+            
+            # programmatic fallback: if the AI still hallucinates 15 scenes in single mode, merge 15 into 14
+            if story_mode == "single" and "scenes" in data and len(data["scenes"]) == 15:
+                # Merge Scene 15 into Scene 14
+                data["scenes"][13]["dialogue"] = data["scenes"][13].get("dialogue", "") + " " + data["scenes"][14].get("dialogue", "")
+                data["scenes"] = data["scenes"][:14]
+                
             return data
             
     except json.JSONDecodeError:

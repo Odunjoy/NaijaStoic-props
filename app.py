@@ -309,7 +309,7 @@ def render_script_transformer():
         st.subheader("📖 Story Mode")
         story_mode_choice = st.radio(
             "Select Story Mode",
-            ["Single Location (13 scenes)", "Multi-Location (4 locations, 12-16 scenes)"],
+            ["Single Location (14 scenes)", "Multi-Location (4 locations, 12-16 scenes)"],
             help="Single Location is the standard 90s format. Multi-Location spans across multiple settings."
         )
         selected_story_mode = "multi" if "Multi" in story_mode_choice else "single"
