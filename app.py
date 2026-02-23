@@ -1051,17 +1051,15 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
             # ── GENDER PREFIX ─────────────────────────────────────────────────
             gender_label = "SHE SAYS:" if is_female else "HE SAYS:"
             
-            # Voice spec is NOT added here — it is emitted once per gender block below
+            # Voice spec is added to every single scene block per user request
             scene_block = (
-                f"[{camera_pov}] {scene.get('shot_type')}, "
+                f"{voice_spec} [{camera_pov}] {scene.get('shot_type')}, "
                 f"{gender_label} {dialogue}, "
                 f"{img_prompt_clean}, "
                 f"Character action: {action}. "
                 f"{motion_clean} "
                 f"{sfx}"
             )
-            # Tag the block with gender so we can group voice specs later
-            scene_block = (scene_block, "female" if is_female else "male")
         else:
             # Full logic
             scene_block = f"{voice_spec} [{camera_pov}] {scene.get('shot_type')}, {gender_prefix}{dialogue}, {img_prompt}, {motion} {sfx}"
@@ -1073,39 +1071,14 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         lesson = output["video_metadata"]["final_lesson"]
         lesson_pov = "[Final close-up - Odogwu's perspective, steady, eye level from Chioma's position] Final close-up"
         if condensed:
-            # For condensed mode, tag as male tuple (spec will be handled below)
-            lesson_block = (f"{lesson_pov}, HE SAYS: {lesson}", "male")
+            lesson_block = f"{MALE_VOICE_SPEC} {lesson_pov}, HE SAYS: {lesson}"
         else:
             lesson_block = f"{MALE_VOICE_SPEC} {lesson_pov}, HE SAYS: {lesson}"
         scene_prompts.append(lesson_block)
     
     join_str = "\n\n" if double_spaced else "\n"
     
-    if condensed:
-        # scene_prompts is a list of (text, gender) tuples.
-        # Emit voice spec ONCE per gender group transition.
-        output_lines = []
-        last_gender = None
-        for item in scene_prompts:
-            if isinstance(item, tuple):
-                text, gender = item
-            else:
-                # Fallback: plain string (shouldn't happen in condensed, but be safe)
-                output_lines.append(item)
-                last_gender = None
-                continue
-            
-            if gender != last_gender:
-                # Gender changed — emit the appropriate voice spec header
-                spec = FEMALE_VOICE_SPEC if gender == "female" else MALE_VOICE_SPEC
-                output_lines.append(spec)
-                last_gender = gender
-            
-            output_lines.append(text)
-        
-        return join_str.join(output_lines)
-    else:
-        return join_str.join(scene_prompts)
+    return join_str.join(scene_prompts)
 
 
 def display_recreator_output(data: dict):
