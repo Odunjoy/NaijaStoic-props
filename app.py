@@ -954,17 +954,15 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
 
         # ── GENDER DETECTION ─────────────────────────────────────────────────
         # Priority 0: Parse condensed_prompt — ABSOLUTE GROUND TRUTH
-        # generate_image_prompt_condensed() already outputs:
-        #   "Odogwu talking to Chioma..." when character == protagonist (male)
-        #   "Chioma talking to Odogwu..." when character == antagonist (female)
-        condensed_p = scene.get('condensed_prompt', '').strip()
+        # generate_image_prompt_condensed() embeds who is speaking:
+        #   "...Odogwu talking to Chioma..." when character == protagonist (male)
+        #   "...Chioma talking to Odogwu..." when character == antagonist (female)
+        condensed_p = scene.get('condensed_prompt', '').lower().strip()
         if condensed_p:
-            cp_lower = condensed_p.lower()
-            # Male speakers: Odogwu, Dad, Segun
-            if cp_lower.startswith(("odogwu ", "dad ", "segun ")):
+            # Use 'in' not 'startswith' — the talking phrase is embedded, not at the start
+            if 'odogwu talking to' in condensed_p or 'dad talking to' in condensed_p or 'segun talking to' in condensed_p:
                 is_male = True
-            # Female speakers: Chioma, Amaka, Ngozi, Mom, Triplet
-            elif cp_lower.startswith(("chioma ", "amaka ", "ngozi ", "mom ", "triplet ")):
+            elif 'chioma talking to' in condensed_p or 'amaka talking to' in condensed_p or 'ngozi talking to' in condensed_p or 'mom talking to' in condensed_p:
                 is_female = True
 
         if not is_female and not is_male:
