@@ -145,9 +145,11 @@ def analyze_visual_style(image_paths: list, api_key: str) -> dict:
             return {"style": "", "location": ""}
             
         prompt = """
-        Analyze these screenshots from a video. Return a JSON object with three keys:
-        1. "style": Describe the lighting (e.g., neon, ambient, natural), color palette, dominant camera angles/composition (e.g., low angle, wide shot, dutch tilt), and overall cinematic vibe. Be specific but concise.
-        2. "location": Describe the physical setting in detail. If you see content creation gear like ring lights, tripods, cameras, or microphones, explicitly describe it as a "professional content creation setup" or "recording studio". If there are windows with city views, describe the "city skyline" or "floor-to-ceiling windows showing city lights". Aim for a rich, visual description (~15-30 words).
+        Analyze these screenshots from a video. CRITICAL INSTRUCTION: Ignore any multi-panel layouts, split screens, text overlays, subtitles, or UI elements. Describe ONLY the actual cinematic scene within the main frame as if it were a single continuous shot.
+
+        Return a JSON object with three keys:
+        1. "style": Describe the lighting (e.g., neon, ambient, natural), color palette, and overall cinematic vibe. Do NOT mention split screens, panels, or text. Be specific but concise.
+        2. "location": Describe the physical setting in detail. If you see content creation gear like ring lights, tripods, cameras, or microphones, explicitly describe it as a "professional content creation setup". If there are windows with city views, describe the "city skyline". Aim for a rich, visual description (~15-30 words).
         3. "posture": Describe if the characters are mostly standing, sitting, or a mix.
         
         Output ONLY the JSON string.
@@ -278,8 +280,8 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
         positioning = f"Odogwu standing on the left side and Amaka standing on the right side of the frame"
         posture_note = "Both characters are standing and fully visible."
     
-    # Strictly enforce positioning and Western attire
-    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."
+    # Strictly enforce positioning and Western attire, as well as single composition
+    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. STRICT MANDATE 2: Single unified composition ONLY. NO text, NO subtitles, NO split screens, NO multi-panels. {style_instruction}, {style['aspect_ratio']}."
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: str = None) -> str:
@@ -314,7 +316,7 @@ def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: s
 
     return (
         f"Establishing Shot — Wide angle full view: {posture} in a {loc}. "
-        f"{posture_note} STRICT MANDATE: English Western style clothing ONLY — NO traditional wear. "
+        f"{posture_note} STRICT MANDATE: English Western style clothing ONLY. Single unified composition. NO text, NO split screens. "
         f"{style['base_style']}, {style['aspect_ratio']}."
     )
 
@@ -398,7 +400,7 @@ def generate_image_prompt(scene: dict, variation: str = "default", animation_sty
     if style_desc: style_instruction = f"Visual Style: {style_desc}. {style_instruction}"
 
     # 6. Construct FINAL prompt
-    prompt = f"{context} {action}. Background is a {location_desc}. {style_instruction}, {style['aspect_ratio']}."
+    prompt = f"{context} {action}. Background is a {location_desc}. Single unified composition, NO text, NO split screens. {style_instruction}, {style['aspect_ratio']}."
     
     return prompt
 
