@@ -952,15 +952,17 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         is_female = False
         is_male   = False
 
-        # Layer 0: phase field (Standard Transformer always sets this — MOST RELIABLE)
-        phase_raw = scene.get('phase', '').lower().strip()
-        if any(p in phase_raw for p in FEMALE_PHASES):
+        # ── GENDER DETECTION ─────────────────────────────────────────────────
+        # Priority 1: 'character' role field — MOST RELIABLE
+        # The AI always outputs 'protagonist' (Odogwu = male) or 'antagonist' (Chioma = female)
+        char_role = scene.get('character', '').lower().strip()
+        if char_role in ('antagonist', 'chioma', 'amaka', 'ngozi', 'mom', 'triplet'):
             is_female = True
-        elif any(p in phase_raw for p in MALE_PHASES):
+        elif char_role in ('protagonist', 'odogwu', 'dad', 'segun'):
             is_male = True
 
         if not is_female and not is_male:
-            # Layer 1: explicit 'gender' field (Recreator Engine scenes)
+            # Priority 2: explicit 'gender' field (Recreator Engine scenes)
             gf = scene.get('gender', '').lower().strip()
             if gf == 'female':
                 is_female = True
@@ -968,18 +970,16 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                 is_male = True
 
         if not is_female and not is_male:
-            # Layer 2: character name registry
-            char_name  = scene.get('character', '').lower().strip()
-            char_words = set(char_name.replace(","," ").replace("("," ").replace(")"," ").split())
+            # Priority 3: character name registry (broader name list)
+            char_words = set(char_role.replace(","," ").replace("("," ").replace(")"," ").split())
             if char_words & FEMALE_NAMES:
                 is_female = True
             elif char_words & MALE_NAMES:
                 is_male = True
 
         if not is_female and not is_male:
-            # Layer 3: keyword scan + dialogue inspection
-            char_name = scene.get('character', '').lower().strip()
-            fp = f" {char_name} "
+            # Priority 4: keyword scan on character/dialogue
+            fp = f" {char_role} "
             is_female = any(f" {k} " in fp for k in ["woman","female","girl","lady"])
             is_male   = any(f" {k} " in fp for k in ["man","male","guy","boy"]) and not is_female
             if not is_female and not is_male:
@@ -989,12 +989,19 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                     is_female = bool(set(dn.split()) & FEMALE_NAMES)
                     is_male   = not is_female
                 else:
-                    # last resort: scenes 1-6 antagonist intro block
-                    sid = scene.get('scene_id', 99)
-                    if isinstance(sid, int) and 1 <= sid <= 6:
+                    # Last resort: Phase-based guess
+                    phase_raw = scene.get('phase', '').lower().strip()
+                    if any(p in phase_raw for p in FEMALE_PHASES):
                         is_female = True
-                    else:
+                    elif any(p in phase_raw for p in MALE_PHASES):
                         is_male = True
+                    else:
+                        # Absolute last resort: scenes 1-6 are antagonist
+                        sid = scene.get('scene_id', 99)
+                        if isinstance(sid, int) and 1 <= sid <= 6:
+                            is_female = True
+                        else:
+                            is_male = True
         # ── END GENDER DETECTION ─────────────────────────────────────────────
         
         dialogue = scene.get('dialogue', '').strip()
