@@ -1008,7 +1008,9 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
             STRIP_PHRASES = [
                 "background ", "very slow", "slow subtle", "locked-off", "slow cinematic",
                 "pan right", "push-in", "push in", "camera", "stay on one spot",
-                "subtle movements only", "no camera", "tripod"
+                "subtle movements only", "no camera", "tripod", "city skyline",
+                "twinkling lights", "curtain movement", "ambient room lighting",
+                "cinematic drift"
             ]
             kept_motion = []
             for sent in motion_sentences:
