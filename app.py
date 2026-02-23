@@ -1043,8 +1043,8 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         
         scene_prompts.append(scene_block)
     
-    # Add Final Lesson (always plain string, not a tuple)
-    if "video_metadata" in output and "final_lesson" in output["video_metadata"]:
+    # Add Final Lesson (only if not already included as a 14th scene)
+    if len(output["scenes"]) < 14 and "video_metadata" in output and "final_lesson" in output["video_metadata"]:
         lesson = output["video_metadata"]["final_lesson"]
         lesson_pov = "[Final close-up - Odogwu's perspective, steady, eye level from Chioma's position] Final close-up"
         if condensed:

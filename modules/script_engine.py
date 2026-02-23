@@ -98,8 +98,8 @@ def transform_script(original_script: str, language_style: str = "pidgin", googl
     # Configure Gemini
     genai.configure(api_key=api_key)
     
-    # Use Gemini 2.5 Flash
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # Use Gemini 2.0 Flash
+    model = genai.GenerativeModel('gemini-2.0-flash')
     
     # Load system prompt
     system_prompt = load_system_prompt()
@@ -150,9 +150,10 @@ def transform_script(original_script: str, language_style: str = "pidgin", googl
         """
     else:
         mode_instruction = """
-        2. Expand to 13 scenes (90 seconds total, 7 seconds per scene)
+        2. Expand to 14 scenes (100 seconds total, 7 seconds per scene)
         3. Keep protagonist calm and logical
-        4. Make antagonist emotional/entitled (scenes 1-6)
+        4. Make antagonist emotional/entitled (scenes 1-7)
+        5. Scene 13 must be the Conclusion, Scene 14 must be the Lesson + CTA.
         """
         output_format = """
         {

@@ -261,20 +261,29 @@ def generate_onscreen_hooks(seo_data: dict, scenes: List[dict]) -> List[str]:
 def generate_final_lesson(seo_data: dict, scenes: List[dict]) -> str:
     """
     Generate a punchy, entertaining, and educational lesson based on the script.
+    If 14 scenes are present, use the dialogue from the 14th scene.
     """
+    if len(scenes) >= 14:
+        last_scene = scenes[13] # Scene 14
+        lesson_text = last_scene.get("dialogue", "").strip()
+        # Clean up the "The lesson:" prefix if the AI already added it
+        if lesson_text.lower().startswith("the lesson:"):
+            return lesson_text
+        return f"The lesson: {lesson_text}"
+
     script_text = " ".join([s.get("dialogue", "") for s in scenes]).lower()
     
     # Analyze theme for specific lessons
     if any(word in script_text for word in ["pay", "bills", "deserve", "entitled"]):
-        return "Your value comes from your character, not your entitlement. No gree for sapa mentality."
+        return "The lesson: your value is built on your character, not your entitlement — a high-value man never chases what should be earned."
     elif any(word in script_text for word in ["prize", "worth", "standards"]):
-        return "A true prize doesn't need to announce its price. Character over packaging."
-    elif any(word in script_text for word in ["marriage", "man", "woman", "date"]):
-        return "Relationships na partnership, no be entitlement workshop. Stay logical."
+        return "The lesson: a true prize does not announce its price — character and consistency speak louder than packaging."
+    elif any(word in script_text for word in ["marriage", "man", "woman", "date", "friend", "trust"]):
+        return "The lesson: a relationship is a partnership built on trust, not a negotiation table for entitlement."
     elif any(word in script_text for word in ["why", "how", "logic"]):
-        return "Question everything with logic. When emotions rise, wisdom must lead."
+        return "The lesson: when emotions run high, the one who leads with logic always holds the higher ground."
     
-    return "Protect your peace and use your logic. No gree for anybody."
+    return "The lesson: a man of standards does not compete — he simply sets the standard others wish they could meet."
 
 
 def generate_video_metadata(
