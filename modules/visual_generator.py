@@ -269,19 +269,19 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
     # Location-aware character positioning
     # If the location implies seating (auditorium, restaurant, table, car, office, etc.)
     # characters should be described as seated, not standing
-    seating_keywords = ["auditorium", "restaurant", "dining", "table", "seat", "car", "vehicle", "office desk", "cafe", "classroom", "lecture", "courtroom", "boardroom"]
+    seating_keywords = ["auditorium", "restaurant", "dining", "table", "seat", "car", "vehicle", "office desk", "cafe", "classroom", "lecture", "courtroom", "boardroom", "bed", "bedroom", "couch", "sofa", "lounge"]
     location_lower = location_desc.lower()
     is_seated_location = any(kw in location_lower for kw in seating_keywords)
     
     if is_seated_location:
-        positioning = f"Odogwu seated on the left side and Amaka seated on the right side of the frame"
-        posture_note = "Both characters are seated and fully visible from the waist up."
+        positioning = f"Odogwu seated on the left and Amaka seated on the right"
+        posture_note = "Both characters are seated, turned facing each other, looking at each other making direct eye contact, actively engaged in a deep conversation. They are NOT looking at the camera. Both are fully visible from the waist up."
     else:
-        positioning = f"Odogwu standing on the left side and Amaka standing on the right side of the frame"
-        posture_note = "Both characters are standing and fully visible."
+        positioning = f"Odogwu standing on the left and Amaka standing on the right"
+        posture_note = "Both characters are standing, turned facing each other, looking at each other making direct eye contact, actively engaged in a deep conversation. They are NOT looking at the camera. Both are fully visible."
     
     # Strictly enforce positioning and Western attire, as well as single composition
-    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."
+    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a cinematic dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: str = None) -> str:
