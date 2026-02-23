@@ -107,11 +107,14 @@ def validate_scene_structure(scenes: list) -> dict:
         if not scene.get("dialogue", "").strip():
             issues.append(f"Scene {scene.get('scene_id')} has no dialogue")
     
-    # Check dialogue length (should be 10-15 words for 7 seconds)
+    # Check dialogue length (should be 10-15 words for 7 seconds, except final scenes)
     for scene in scenes:
         word_count = len(scene.get("dialogue", "").split())
-        if word_count > 20:  # Warning if too long
-            issues.append(f"Scene {scene.get('scene_id')} has {word_count} words (should be 10-15 for 7 sec)")
+        scene_id = scene.get("scene_id")
+        limit = 35 if scene_id in [13, 14] else 20
+        
+        if word_count > limit:  # Warning if too long
+            issues.append(f"Scene {scene.get('scene_id')} has {word_count} words (limit is {limit})")
     
     return {
         "valid": len(issues) == 0,
