@@ -97,8 +97,9 @@ SHOES = ["polished black loafers", "clean designer sneakers", "elegant pointed-t
 LOCATION_POOL = [
     "high-end bedroom with a large wardrobe in the background, modern Nigerian interior design",
     "luxury Lagos penthouse living room with floor-to-ceiling windows showing city lights",
+    "professional content creation studio with a ring light on a tripod, a high-end camera, and soft purple-and-blue neon ambient lighting",
     "contemporary home office with mahogany furniture and modern minimalist art",
-    "exclusive rooftop lounge in Victoria Island with a view of the Atlantic",
+    "exclusive rooftop lounge in Victoria Island with a view of the Atlantic Ocean at night",
     "modern minimalist kitchen with marble countertops and sleek appliances",
     "lush private garden patio with tropical plants and soft ambient lighting",
     "sophisticated private library with wall-to-wall books and leather armchairs"
@@ -145,9 +146,9 @@ def analyze_visual_style(image_paths: list, api_key: str) -> dict:
             
         prompt = """
         Analyze these screenshots from a video. Return a JSON object with three keys:
-        1. "style": Describe the lighting, color palette, **dominant camera angles/composition** (e.g., low angle, wide shot, dutch tilt), and overall visual vibe (concise, < 50 words).
-        2. "location": Describe the physical setting/environment where the scene takes place (e.g., "futuristic neon bar", "cluttered living room", "sunny park") (concise, < 20 words).
-        3. "posture": Describe if the characters are mostly standing, sitting, or a mix (e.g., "both standing", "both sitting", "one standing, one sitting").
+        1. "style": Describe the lighting (e.g., neon, ambient, natural), color palette, dominant camera angles/composition (e.g., low angle, wide shot, dutch tilt), and overall cinematic vibe. Be specific but concise.
+        2. "location": Describe the physical setting in detail. If you see content creation gear like ring lights, tripods, cameras, or microphones, explicitly describe it as a "professional content creation setup" or "recording studio". If there are windows with city views, describe the "city skyline" or "floor-to-ceiling windows showing city lights". Aim for a rich, visual description (~15-30 words).
+        3. "posture": Describe if the characters are mostly standing, sitting, or a mix.
         
         Output ONLY the JSON string.
         """
