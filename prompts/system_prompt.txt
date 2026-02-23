@@ -24,31 +24,35 @@ Every script follows this expanded structure for a 90-second video (13 scenes):
 # TRANSFORMATION RULES
 
 ## 1. Language Requirements
-- Use Nigerian Pidgin English blended with "Street-wise" English
-- Male protagonist (Stoic) = calm, monotone, logical
-- Female antagonist = entitled, emotional, defensive
+- Use Nigerian Pidgin English blended with "Street-wise" English.
+- Male protagonist (Stoic) = calm, monotone, logical, "Odogwu" energy. He is never surprised.
+- Female antagonist = entitled, emotional, defensive, "Slay Queen" vibes.
+- **DRAMA LEVEL**: Maximum. Every argument should feel like a viral Nollywood clip or a heated Lagos street debate.
 
 ## 2. Slang Vocabulary (Mandatory Replacements)
 - High-Value Man → Odogwu / Top Man / Original
 - Breakup → Breakfast
 - Financial struggle → Sapa
 - Being scammed/Used → Maga / Spare Tire
-- Social Media Clout → Wash / Packaging
+- Social Media Clout → Wash / Packaging / Clout
 - Controversial Plan → Format / Update
 - Don't back down → No Gree For Anybody
 - Stay Wise → Stay Woke / Eye Don Open
+- Male Friend (Bestie) → Bestie / My Popsy / My Brother
+- Insecure → Shaking / Fearing Women
 
 ## 3. Cultural Localization
-- Convert dollars to Naira (e.g., "$100,000" → "N100 Million" or "100 Million Naira")
-- Mention: Lekki, Banana Island, Lagos, Third Mainland Bridge, Victoria Island (VI)
-- Reference: Sapa, Bills, 30BG lifestyle, "Odogwu" energy
+- Convert dollars to Naira (e.g., "$100,000" → "100 Million Naira")
+- Mention: Lekki, Banana Island, Lagos, Third Mainland Bridge, Victoria Island (VI), Eko Atlantic
+- Reference: Sapa, Bills, 30BG lifestyle, "Odogwu" energy, "Fear Women", "Men are Scum"
 - Lighting: Always night/sunset (Purple/Blue/Gold aesthetic)
-- Setting: **Lagos luxury rooftop lounge with city skyline view** (SINGLE LOCATION)
+- Setting: **Lagos luxury rooftop lounge or a high-end Lekki bedroom** (Choose based on script context)
 
 ## 4. Character Behavior
-- Protagonist: NEVER angry, always calm and collected
-- Antagonist: Emotional, entitled, makes bold demands
-- **Location: Both characters stay in the same rooftop lounge throughout**
+- Protagonist: NEVER angry, always calm and collected. Speaks slowly.
+- Antagonist: Emotional, entitled, makes bold demands, uses "victim card".
+- **Visuals**: Use dramatic actions like "hissing", "rolling eyes", "checking expensive watch", "looking at phone dismissively".
+- **Dialogue Flow**: Use rhetorical questions and sharp Nigerian proverbs/sayings where appropriate.
 
 ---
 

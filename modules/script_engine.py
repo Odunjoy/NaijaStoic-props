@@ -40,6 +40,21 @@ SLANG_MAP = {
     "independent woman": "Boss Lady",
     "sigma male": "Original Man",
     "alpha male": "Odogwu",
+    "male friend": "Bestie",
+    "best friend": "Bestie",
+    "friend": "Paddy",
+    "insecure": "shaking",
+    "controlling": "monitoring spirit",
+    "disrespect": "rubbish",
+    "attention": "clout",
+    "backup plan": "spare tire",
+    "serious": "for real",
+    "ridiculous": "delusional",
+    "slamming": "vexing",
+    "toxic": "toxic (men are scum vibes)",
+    "lonely": "horny", # Nigerian drama often implies this
+    "loneliness": "lonely",
+    "attention of other men": "clout from other boys",
 }
 
 
@@ -95,7 +110,7 @@ def transform_script(original_script: str, language_style: str = "pidgin", googl
         end_phrase = "No gree for anybody"
     elif language_style == "english":
         lang_instruction = "1. Rewrite into **Standard Nigerian English**. Clear, grammatically correct, and sophisticated English as spoken by educated Nigerians. Use a distinct Nigerian tone and assertiveness, but ABSOLUTELY NO PIDGIN, NO STREET SLANG (no Sapa, no breakfast, no gree, etc.). Use formal Nigerian sentence structures (e.g., 'So, how can you explain this?' instead of 'How you wan explain this?'). Target an elite, corporate Nigerian professional audience."
-        end_phrase = "Do not back down from your principles"
+        end_phrase = "The lesson: a man of standards does not compete — he simply sets the standard others wish they could meet"
     else: # Default pidgin
         lang_instruction = "1. Rewrite into **Nigerian Pidgin (Vibe)** (Authentic Nigerian Pidgin English). Raw, expressive, and full of local street flavor (Warri/Lagos style)."
         end_phrase = "No gree for anybody"
@@ -179,7 +194,7 @@ Requirements:
 Output Format: JSON ONLY.
 {output_format}
 
-End the final scene with "{end_phrase}"
+End the FINAL scene's dialogue with a Stoic lesson that begins with the words: "{end_phrase}" — stated as a wise observation or takeaway, NOT as a direct command to the other character.
 """
     
     # Combine system and user prompts
