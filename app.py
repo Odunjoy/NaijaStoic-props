@@ -953,13 +953,27 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         is_male   = False
 
         # ── GENDER DETECTION ─────────────────────────────────────────────────
-        # Priority 1: 'character' role field — MOST RELIABLE
-        # The AI always outputs 'protagonist' (Odogwu = male) or 'antagonist' (Chioma = female)
-        char_role = scene.get('character', '').lower().strip()
-        if char_role in ('antagonist', 'chioma', 'amaka', 'ngozi', 'mom', 'triplet'):
-            is_female = True
-        elif char_role in ('protagonist', 'odogwu', 'dad', 'segun'):
-            is_male = True
+        # Priority 0: Parse condensed_prompt — ABSOLUTE GROUND TRUTH
+        # generate_image_prompt_condensed() already outputs:
+        #   "Odogwu talking to Chioma..." when character == protagonist (male)
+        #   "Chioma talking to Odogwu..." when character == antagonist (female)
+        condensed_p = scene.get('condensed_prompt', '').strip()
+        if condensed_p:
+            cp_lower = condensed_p.lower()
+            # Male speakers: Odogwu, Dad, Segun
+            if cp_lower.startswith(("odogwu ", "dad ", "segun ")):
+                is_male = True
+            # Female speakers: Chioma, Amaka, Ngozi, Mom, Triplet
+            elif cp_lower.startswith(("chioma ", "amaka ", "ngozi ", "mom ", "triplet ")):
+                is_female = True
+
+        if not is_female and not is_male:
+            # Priority 1: 'character' role field
+            char_role = scene.get('character', '').lower().strip()
+            if char_role in ('antagonist', 'chioma', 'amaka', 'ngozi', 'mom', 'triplet'):
+                is_female = True
+            elif char_role in ('protagonist', 'odogwu', 'dad', 'segun'):
+                is_male = True
 
         if not is_female and not is_male:
             # Priority 2: explicit 'gender' field (Recreator Engine scenes)
@@ -971,6 +985,7 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
 
         if not is_female and not is_male:
             # Priority 3: character name registry (broader name list)
+            char_role = scene.get('character', '').lower().strip()
             char_words = set(char_role.replace(","," ").replace("("," ").replace(")"," ").split())
             if char_words & FEMALE_NAMES:
                 is_female = True
@@ -978,30 +993,12 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                 is_male = True
 
         if not is_female and not is_male:
-            # Priority 4: keyword scan on character/dialogue
-            fp = f" {char_role} "
-            is_female = any(f" {k} " in fp for k in ["woman","female","girl","lady"])
-            is_male   = any(f" {k} " in fp for k in ["man","male","guy","boy"]) and not is_female
-            if not is_female and not is_male:
-                dl = scene.get('dialogue','').lower()
-                if " says:" in dl:
-                    dn = dl.split(" says:")[0].strip()
-                    is_female = bool(set(dn.split()) & FEMALE_NAMES)
-                    is_male   = not is_female
-                else:
-                    # Last resort: Phase-based guess
-                    phase_raw = scene.get('phase', '').lower().strip()
-                    if any(p in phase_raw for p in FEMALE_PHASES):
-                        is_female = True
-                    elif any(p in phase_raw for p in MALE_PHASES):
-                        is_male = True
-                    else:
-                        # Absolute last resort: scenes 1-6 are antagonist
-                        sid = scene.get('scene_id', 99)
-                        if isinstance(sid, int) and 1 <= sid <= 6:
-                            is_female = True
-                        else:
-                            is_male = True
+            # Priority 4: last resort — scene position (1-6 = antagonist/female)
+            sid = scene.get('scene_id', 99)
+            if isinstance(sid, int) and 1 <= sid <= 6:
+                is_female = True
+            else:
+                is_male = True
         # ── END GENDER DETECTION ─────────────────────────────────────────────
         
         dialogue = scene.get('dialogue', '').strip()
