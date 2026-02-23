@@ -353,6 +353,25 @@ Man: So let me get this straight. You want a six-figure earner, but your only co
             value=sample_script if st.checkbox("Load sample script") else ""
         )
         
+        st.markdown("---")
+        st.subheader("🖼️ Custom Scene Setup (Optional)")
+        st.markdown("Upload a reference image to define the location and visual vibe for the Opening Shot.")
+        setup_image = st.file_uploader("Upload Image (JPG/PNG)", type=["jpg", "jpeg", "png"])
+        
+        if setup_image:
+            os.makedirs("temp_frames", exist_ok=True)
+            custom_image_path = os.path.join("temp_frames", "custom_scene.jpg")
+            with open(custom_image_path, "wb") as f:
+                f.write(setup_image.getbuffer())
+            st.image(setup_image, caption="Custom Scene Reference", width=150)
+            st.session_state['custom_setup_image'] = custom_image_path
+        else:
+            # Clear if removed
+            if 'custom_setup_image' in st.session_state:
+                del st.session_state['custom_setup_image']
+                
+        st.markdown("---")
+        
         # Transform button
         transform_button = st.button("🚀 Nigerianize Script", type="primary", use_container_width=True)
     
@@ -411,8 +430,12 @@ Man: So let me get this straight. You want a six-figure earner, but your only co
                         visual_ctx = st.session_state.get('visual_context', {})
                         # If visual context has explicit location, it overrides script setting
                     else:
-                        # If no external visual context, create one from the extracted setting!
-                        if setting_description:
+                        # If no external visual context, check for custom uploaded image!
+                        if 'custom_setup_image' in st.session_state and os.path.exists(st.session_state['custom_setup_image']):
+                            with st.spinner("🔍 Analyzing custom scene image..."):
+                                 visual_ctx = analyze_visual_style([st.session_state['custom_setup_image']], api_key)
+                                 st.toast("✅ Custom visual style extracted!")
+                        elif setting_description:
                              visual_ctx = {"style": "Cinematic 3D CGI Animation", "location": setting_description}
                         else:
                              visual_ctx = {}
@@ -520,9 +543,11 @@ def build_complete_output(scenes: list, seo_data: dict, style_variation: str, an
         language_style=st.session_state.get('language_style', 'pidgin')
     )
     
-    # Use the first extracted YouTube frame as a reference for Scene Setup if available
+    # Use the custom uploaded image or first extracted YouTube frame as a reference for Scene Setup
     reference_frame = None
-    if 'extracted_frames' in st.session_state and st.session_state['extracted_frames']:
+    if 'custom_setup_image' in st.session_state and os.path.exists(st.session_state['custom_setup_image']):
+        reference_frame = os.path.basename(st.session_state['custom_setup_image'])
+    elif 'extracted_frames' in st.session_state and st.session_state['extracted_frames']:
         reference_frame = st.session_state['extracted_frames'][0]
         # Make the path cleaner for display if it's absolute
         if os.path.isabs(reference_frame):
