@@ -1006,10 +1006,10 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
         if dialogue:
             if is_female:
                 voice_spec = FEMALE_VOICE_SPEC
-                gender_prefix = "She says: "
+                gender_prefix = "Chioma says: "
             elif is_male:
                 voice_spec = MALE_VOICE_SPEC
-                gender_prefix = "He says: "
+                gender_prefix = "Odogwu says: "
         
         if condensed:
             action = scene.get('action_description', '').replace("\n", " ").strip()
@@ -1023,6 +1023,8 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
             raw_img = re.sub(r'Background is an?[^.]+\.', '', raw_img)
             raw_img = re.sub(r'Visual Style:[^.]+\.', '', raw_img)
             raw_img = re.sub(r'Features [^.]+\.', '', raw_img)
+            # Strip the 'Chioma talking to Odogwu.' / 'Odogwu talking to Chioma.' context line
+            raw_img = re.sub(r'[A-Za-z]+ talking to [A-Za-z]+\.', '', raw_img)
             img_prompt_clean = re.sub(r'\s{2,}', ' ', raw_img).strip()
             img_prompt_clean = re.sub(r'^[,. ]+|[,. ]+$', '', img_prompt_clean).strip()
             img_prompt_clean = re.sub(r'(\s*\.\s*){2,}', '. ', img_prompt_clean).strip(". ")
@@ -1050,8 +1052,8 @@ def generate_bulk_prompts(output: dict, double_spaced: bool = False, condensed: 
                     kept_motion.append(sent.strip())
             motion_clean = " ".join(kept_motion).strip()
             
-            # ── GENDER PREFIX ─────────────────────────────────────────────────
-            gender_label = "SHE SAYS:" if is_female else "HE SAYS:"
+            # ── SPEAKER LABEL (use actual character names) ────────────────────
+            gender_label = "CHIOMA SAYS:" if is_female else "ODOGWU SAYS:"
             
             # Voice spec is added to every single scene block per user request
             scene_block = (
