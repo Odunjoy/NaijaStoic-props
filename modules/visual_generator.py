@@ -281,7 +281,7 @@ def generate_scene_setup_prompt(animation_style: str = "3d_cgi", story_context: 
         posture_note = "Both characters are standing and fully visible."
     
     # Strictly enforce positioning and Western attire, as well as single composition
-    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. STRICT MANDATE 2: Single unified composition ONLY. NO text, NO subtitles, NO split screens, NO multi-panels. {style_instruction}, {style['aspect_ratio']}."
+    return f"{ref_part}Scene Setup - Clear Wide shot: {dad_full} and {mom_full}. Both characters are positioned professionally for a dialogue scene, with {positioning}. STRICT MANDATE: Characters must wear ONLY English Western style clothing - NO traditional wear or kaftans. {posture_note} Both characters are fully visible in a {location_desc}, maintaining physical anchors (Dad's buzz cut and Mom's Afro/glasses). {context_element}The composition is clean and balanced. {style_instruction}, {style['aspect_ratio']}."
 
 
 def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: str = None) -> str:
@@ -316,7 +316,7 @@ def generate_establishing_shot(animation_style: str = "3d_cgi", location_desc: s
 
     return (
         f"Establishing Shot — Wide angle full view: {posture} in a {loc}. "
-        f"{posture_note} STRICT MANDATE: English Western style clothing ONLY. Single unified composition. NO text, NO split screens. "
+        f"{posture_note} STRICT MANDATE: English Western style clothing ONLY. "
         f"{style['base_style']}, {style['aspect_ratio']}."
     )
 
